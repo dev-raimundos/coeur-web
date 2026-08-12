@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { environment } from '@env';
 
 export const ApiUrlInterceptor: HttpInterceptorFn = (request, next) => {
     if (request.url.startsWith('/')) {

@@ -4,8 +4,8 @@ import { Injectable, signal } from '@angular/core';
     providedIn: 'root',
 })
 export class AuthService {
+    private readonly _url = '/api/v1/auth/login';
     private readonly _isLoggedIn = signal<boolean>(this.checkToken());
-
     public readonly isLoggedIn = this._isLoggedIn.asReadonly();
 
     private checkToken(): boolean {
@@ -19,6 +19,6 @@ export class AuthService {
 
     public logout() {
         localStorage.removeItem('token');
-        this._isLoggedIn.set(false)
+        this._isLoggedIn.set(false);
     }
 }
