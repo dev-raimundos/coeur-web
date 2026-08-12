@@ -11,7 +11,20 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
+          "type": "component",
+          "flat": false,
           "style": "scss"
+        },
+        "@schematics/angular:service": {
+          "type": "service",
+          "flat": false
+        },
+        "@schematics/angular:directive": {
+          "type": "directive",
+          "flat": false
+        },
+        "@schematics/angular:pipe": {
+          "flat": false
         }
       },
       "root": "",
@@ -30,7 +43,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
