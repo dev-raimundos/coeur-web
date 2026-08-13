@@ -6,9 +6,6 @@
     width: 280px;
     border-right: 1px solid var(--mat-sys-outline-variant);
 
-    // O mat-sidenav projeta o conteúdo dentro desse container interno, então é
-    // ele (e não o próprio host) que precisa ser flex-column pra `.spacer`
-    // empurrar o menu de usuário pro fundo.
     ::ng-deep .mat-drawer-inner-container {
         display: flex;
         flex-direction: column;
@@ -29,8 +26,6 @@
     width: 26px;
     height: 26px;
 
-    // O SVG é preto por padrão (ok no tema claro); no escuro precisa inverter
-    // pra ficar visível sobre o fundo escuro.
     :host-context(.dark) & {
         filter: invert(1);
     }

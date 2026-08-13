@@ -53,9 +53,7 @@ export class LoginComponent {
                 const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
                 this._router.navigateByUrl(returnUrl);
             },
-            error: () => {
-                // Erro já é exibido globalmente pelo HttpErrorInterceptor via toast.
-            },
+            error: () => {},
         });
     }
 }
