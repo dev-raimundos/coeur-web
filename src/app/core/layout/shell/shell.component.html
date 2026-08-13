@@ -25,6 +25,39 @@
                 </a>
             }
         </mat-nav-list>
+
+        <div class="spacer"></div>
+
+        @if (currentUser(); as user) {
+            <mat-divider></mat-divider>
+            <button class="user-menu-trigger" [matMenuTriggerFor]="userMenu">
+                <span class="user-avatar">{{ userInitials() }}</span>
+                <span class="user-name">{{ userDisplayName() }}</span>
+                <mat-icon class="user-menu-caret">arrow_drop_up</mat-icon>
+            </button>
+
+            <mat-menu #userMenu="matMenu" xPosition="after" yPosition="above">
+                <button mat-menu-item (click)="setTheme('light')">
+                    <mat-icon>light_mode</mat-icon>
+                    <span>Tema claro</span>
+                    @if (theme() === 'light') {
+                        <mat-icon class="user-menu-check">check</mat-icon>
+                    }
+                </button>
+                <button mat-menu-item (click)="setTheme('dark')">
+                    <mat-icon>dark_mode</mat-icon>
+                    <span>Tema escuro</span>
+                    @if (theme() === 'dark') {
+                        <mat-icon class="user-menu-check">check</mat-icon>
+                    }
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    <span>Sair</span>
+                </button>
+            </mat-menu>
+        }
     </mat-sidenav>
 
     <mat-sidenav-content>
