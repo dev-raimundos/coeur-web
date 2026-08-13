@@ -1,0 +1,9 @@
+<div class="error-page">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <h1>Ocorreu um erro inesperado</h1>
+  <p class="error-description">Não foi possível concluir a operação. Tente novamente em instantes.</p>
+  <div class="error-actions">
+    <button mat-stroked-button (click)="reload()">Tentar novamente</button>
+    <a mat-flat-button color="primary" routerLink="/">Voltar para o início</a>
+  </div>
+</div>

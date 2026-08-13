@@ -1,0 +1,80 @@
+<mat-sidenav-container class="container">
+    <mat-sidenav
+        #sidenav
+        [mode]="isMobile() ? 'over' : 'side'"
+        [opened]="opened()"
+        [fixedInViewport]="isMobile()"
+        class="sidenav"
+    >
+        <div class="brand">
+            <img src="heart_log.svg" alt="" class="brand-icon" />
+            <span class="brand-name">Coeur</span>
+        </div>
+        <mat-divider></mat-divider>
+        <mat-nav-list>
+            @for (item of menuItems; track item.route) {
+                <a
+                    mat-list-item
+                    [routerLink]="item.route"
+                    routerLinkActive
+                    #rla="routerLinkActive"
+                    [activated]="rla.isActive"
+                >
+                    <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                    <span matListItemTitle>{{ item.label }}</span>
+                </a>
+            }
+        </mat-nav-list>
+
+        <div class="spacer"></div>
+
+        @if (currentUser(); as user) {
+            <mat-divider></mat-divider>
+            <button
+                class="user-menu-trigger"
+                [matMenuTriggerFor]="userMenu"
+                #userMenuTrigger="matMenuTrigger"
+            >
+                <span class="user-avatar">{{ userInitials() }}</span>
+                <span class="user-name">{{ userDisplayName() }}</span>
+                <mat-icon class="user-menu-caret" [class.user-menu-caret-open]="userMenuTrigger.menuOpen">
+                    arrow_drop_up
+                </mat-icon>
+            </button>
+
+            <mat-menu #userMenu="matMenu" xPosition="before" yPosition="above">
+                <button mat-menu-item (click)="setTheme('light')">
+                    <mat-icon>light_mode</mat-icon>
+                    <span>Tema claro</span>
+                    @if (theme() === 'light') {
+                        <mat-icon class="user-menu-check">check</mat-icon>
+                    }
+                </button>
+                <button mat-menu-item (click)="setTheme('dark')">
+                    <mat-icon>dark_mode</mat-icon>
+                    <span>Tema escuro</span>
+                    @if (theme() === 'dark') {
+                        <mat-icon class="user-menu-check">check</mat-icon>
+                    }
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    <span>Sair</span>
+                </button>
+            </mat-menu>
+        }
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+        <mat-toolbar color="primary">
+            <button mat-icon-button (click)="toggleSidenav()">
+                <mat-icon>side_navigation</mat-icon>
+            </button>
+        </mat-toolbar>
+
+        <div class="content">
+            <router-outlet></router-outlet>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>

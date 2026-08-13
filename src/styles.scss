@@ -1,1 +1,190 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+    height: 100%;
+    @include mat.theme(
+        (
+            color: (
+                primary: mat.$azure-palette,
+                tertiary: mat.$blue-palette,
+            ),
+            typography: 'Noto Sans',
+            density: -1,
+        )
+    );
+}
+
+// Cores geradas em https://themes.angular-material.dev/ a partir das seed colors
+// primary: #2d3d28, secondary: #c2c9bb, tertiary: #aeccd3, error: #ffb4ab,
+// neutral: #777774, neutral-variant: #747870.
+:root,
+:host {
+    @include mat.theme-overrides(
+        (
+            primary: #52634c,
+            on-primary: #ffffff,
+            primary-container: #d5e8ca,
+            on-primary-container: #101f0d,
+            inverse-primary: #b9ccaf,
+            primary-fixed: #d5e8ca,
+            primary-fixed-dim: #b9ccaf,
+            on-primary-fixed: #101f0d,
+            on-primary-fixed-variant: #3b4b35,
+            secondary: #596055,
+            on-secondary: #ffffff,
+            secondary-container: #dee5d6,
+            on-secondary-container: #171d14,
+            secondary-fixed: #dee5d6,
+            secondary-fixed-dim: #c2c9bb,
+            on-secondary-fixed: #171d14,
+            on-secondary-fixed-variant: #42493e,
+            tertiary: #476369,
+            on-tertiary: #ffffff,
+            tertiary-container: #c9e8ef,
+            on-tertiary-container: #001f25,
+            tertiary-fixed: #c9e8ef,
+            tertiary-fixed-dim: #aeccd3,
+            on-tertiary-fixed: #001f25,
+            on-tertiary-fixed-variant: #2f4b51,
+            background: #fcf8f7,
+            on-background: #1c1b1b,
+            surface: #fcf8f7,
+            surface-dim: #ddd9d8,
+            surface-bright: #fcf8f7,
+            surface-container-lowest: #ffffff,
+            surface-container-low: #f7f3f2,
+            surface-container: #f1edec,
+            surface-container-high: #ebe7e6,
+            surface-container-highest: #e5e2e1,
+            on-surface: #1c1b1b,
+            shadow: #000000,
+            scrim: #000000,
+            surface-tint: #5e5e5c,
+            inverse-surface: #313030,
+            inverse-on-surface: #f4f0ef,
+            outline: #767872,
+            outline-variant: #c5c7c0,
+            neutral: #797776,
+            neutral10: #1c1b1b,
+            error: #ba1a1a,
+            error-container: #ffdad6,
+            on-error: #ffffff,
+            on-error-container: #410002,
+            surface-variant: #e2e3dc,
+            on-surface-variant: #454842,
+            neutral-variant: #757872,
+            neutral-variant20: #2e312c,
+            inverse-secondary: #c2c9bb,
+            inverse-tertiary: #aeccd3,
+        )
+    );
+}
+
+// Tema escuro: adicionar a classe `dark` (ex.: em <html> ou <body>) para ativar.
+.dark {
+    @include mat.theme-overrides(
+        (
+            primary: #b9ccaf,
+            on-primary: #253420,
+            primary-container: #3b4b35,
+            on-primary-container: #d5e8ca,
+            inverse-primary: #52634c,
+            primary-fixed: #d5e8ca,
+            primary-fixed-dim: #b9ccaf,
+            on-primary-fixed: #101f0d,
+            on-primary-fixed-variant: #3b4b35,
+            secondary: #c2c9bb,
+            on-secondary: #2c3228,
+            secondary-container: #42493e,
+            on-secondary-container: #dee5d6,
+            secondary-fixed: #dee5d6,
+            secondary-fixed-dim: #c2c9bb,
+            on-secondary-fixed: #171d14,
+            on-secondary-fixed-variant: #42493e,
+            tertiary: #aeccd3,
+            on-tertiary: #18343a,
+            tertiary-container: #2f4b51,
+            on-tertiary-container: #c9e8ef,
+            tertiary-fixed: #c9e8ef,
+            tertiary-fixed-dim: #aeccd3,
+            on-tertiary-fixed: #001f25,
+            on-tertiary-fixed-variant: #2f4b51,
+            background: #141313,
+            on-background: #e5e2e1,
+            surface: #141313,
+            surface-dim: #141313,
+            surface-bright: #3a3938,
+            surface-container-lowest: #0e0e0e,
+            surface-container-low: #1c1b1b,
+            surface-container: #201f1f,
+            surface-container-high: #2a2a29,
+            surface-container-highest: #353434,
+            on-surface: #e5e2e1,
+            shadow: #000000,
+            scrim: #000000,
+            surface-tint: #c7c6c3,
+            inverse-surface: #e5e2e1,
+            inverse-on-surface: #313030,
+            outline: #90918c,
+            outline-variant: #454842,
+            neutral: #797776,
+            neutral10: #1c1b1b,
+            error: #ffb4ab,
+            error-container: #93000a,
+            on-error: #690005,
+            on-error-container: #ffdad6,
+            surface-variant: #454842,
+            on-surface-variant: #c5c7c0,
+            neutral-variant: #757872,
+            neutral-variant20: #2e312c,
+            inverse-secondary: #596055,
+            inverse-tertiary: #476369,
+        )
+    );
+
+    // A classe `dark` é alternada dinamicamente no <html> pelo ThemeService.
+    color-scheme: dark;
+}
+
+body {
+    // Tema padrão da aplicação; sobrescrito por `html.dark` acima quando o
+    // usuário opta pelo tema escuro nas configurações (via ThemeService).
+    color-scheme: light;
+
+    // Set a default background, font and text colors for the application using
+    // Angular Material's system-level CSS variables. Learn more about these
+    // variables at https://material.angular.dev/guide/system-variables
+    background-color: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    font: var(--mat-sys-body-medium);
+
+    // Reset the user agent margin.
+    margin: 0;
+    height: 100%;
+}
+
+// Cores por tipo de toast, usadas pelo HttpErrorInterceptor via MatSnackBar panelClass.
+// MatSnackBar renderiza fora da árvore do component, então isso precisa ficar global.
+.app-toast-error {
+    --mdc-snackbar-container-color: var(--mat-sys-error);
+    --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error);
+    --mat-snack-bar-button-color: var(--mat-sys-on-error);
+}
+
+.app-toast-warning {
+    --mdc-snackbar-container-color: #a15c00;
+    --mdc-snackbar-supporting-text-color: #fff;
+    --mat-snack-bar-button-color: #fff;
+}
+
+.app-toast-info {
+    --mdc-snackbar-container-color: var(--mat-sys-inverse-surface);
+    --mdc-snackbar-supporting-text-color: var(--mat-sys-inverse-on-surface);
+    --mat-snack-bar-button-color: var(--mat-sys-inverse-on-surface);
+}
 /* You can add global styles to this file, and also import other style files */
