@@ -1,4 +1,224 @@
-<h1>Dashboard</h1>
-@if (currentUser(); as user) {
-  <p>Bem-vindo(a), {{ user.name }}.</p>
-}
+<header class="dashboard-header">
+    <h1>Dashboard</h1>
+    @if (currentUser(); as user) {
+        <p>Bem-vindo(a), {{ user.name }}.</p>
+    }
+</header>
+
+<div class="demo-grid">
+    <mat-card class="demo-card">
+        <mat-card-header>
+            <mat-card-title>Botões</mat-card-title>
+            <mat-card-subtitle>Ações, ícones e destaque</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="button-row">
+            <button mat-flat-button>Flat</button>
+            <button mat-raised-button color="primary">Raised</button>
+            <button mat-stroked-button>Stroked</button>
+            <button mat-button>Text</button>
+            <button mat-icon-button matTooltip="Notificações" matBadge="3" matBadgeSize="small" matBadgeColor="warn">
+                <mat-icon>notifications</mat-icon>
+            </button>
+            <button mat-fab color="primary" matTooltip="Adicionar">
+                <mat-icon>add</mat-icon>
+            </button>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card demo-card--wide">
+        <mat-card-header>
+            <mat-card-title>Formulário</mat-card-title>
+            <mat-card-subtitle>Campos, seleção e validação</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="form" class="demo-form" (ngSubmit)="submitForm()">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nome</mat-label>
+                    <input matInput formControlName="name" />
+                    @if (form.controls.name.invalid && form.controls.name.touched) {
+                        <mat-error>Informe um nome.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>E-mail</mat-label>
+                    <input matInput type="email" formControlName="email" />
+                    @if (form.controls.email.invalid && form.controls.email.touched) {
+                        <mat-error>Informe um e-mail válido.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Categoria</mat-label>
+                    <mat-select formControlName="category">
+                        @for (option of categoryOptions; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Data prevista</mat-label>
+                    <input matInput [matDatepicker]="datepicker" formControlName="date" />
+                    <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+                    <mat-datepicker #datepicker></mat-datepicker>
+                </mat-form-field>
+
+                <div class="demo-form__field">
+                    <span class="demo-form__label">Tags</span>
+                    <mat-chip-listbox formControlName="tags" multiple>
+                        @for (tag of tagOptions; track tag) {
+                            <mat-chip-option [value]="tag">{{ tag }}</mat-chip-option>
+                        }
+                    </mat-chip-listbox>
+                </div>
+
+                <div class="demo-form__field">
+                    <span class="demo-form__label">Plano</span>
+                    <mat-radio-group formControlName="plan" class="demo-form__radio-group">
+                        @for (option of planOptions; track option) {
+                            <mat-radio-button [value]="option">{{ option }}</mat-radio-button>
+                        }
+                    </mat-radio-group>
+                </div>
+
+                <div class="demo-form__field">
+                    <span class="demo-form__label">Volume de alerta</span>
+                    <mat-slider min="0" max="100" step="10" discrete>
+                        <input matSliderThumb formControlName="volume" />
+                    </mat-slider>
+                </div>
+
+                <mat-slide-toggle formControlName="notifications">Receber notificações</mat-slide-toggle>
+
+                <mat-checkbox formControlName="agree">Concordo com os termos</mat-checkbox>
+
+                <button mat-flat-button color="primary" type="submit" class="demo-form__submit">
+                    Enviar
+                </button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card">
+        <mat-card-header>
+            <mat-card-title>Feedback</mat-card-title>
+            <mat-card-subtitle>Progresso, snackbar e diálogo</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="feedback-content">
+            <mat-progress-bar [mode]="isLoading() ? 'indeterminate' : 'determinate'" [value]="70"></mat-progress-bar>
+
+            <div class="feedback-actions">
+                <button mat-stroked-button (click)="simulateLoading()" [disabled]="isLoading()">
+                    @if (isLoading()) {
+                        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                    } @else {
+                        Simular carregamento
+                    }
+                </button>
+                <button mat-stroked-button (click)="openDialog()">Abrir diálogo</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card">
+        <mat-card-header>
+            <mat-card-title>Abas</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-tab-group>
+                <mat-tab label="Visão geral">
+                    <p class="tab-content">Resumo das atividades recentes do sistema.</p>
+                </mat-tab>
+                <mat-tab label="Detalhes">
+                    <p class="tab-content">Informações detalhadas sobre o item selecionado.</p>
+                </mat-tab>
+                <mat-tab label="Histórico">
+                    <p class="tab-content">Linha do tempo de alterações.</p>
+                </mat-tab>
+            </mat-tab-group>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card">
+        <mat-card-header>
+            <mat-card-title>Atividade recente</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-list>
+                @for (item of activityItems; track item.title) {
+                    <mat-list-item>
+                        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                        <span matListItemTitle>{{ item.title }}</span>
+                        <span matListItemLine>{{ item.subtitle }}</span>
+                    </mat-list-item>
+                }
+            </mat-list>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card demo-card--wide">
+        <mat-card-header>
+            <mat-card-title>Usuários</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="table-scroll">
+                <table mat-table [dataSource]="userRows">
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Nome</th>
+                        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="email">
+                        <th mat-header-cell *matHeaderCellDef>E-mail</th>
+                        <td mat-cell *matCellDef="let row">{{ row.email }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="role">
+                        <th mat-header-cell *matHeaderCellDef>Perfil</th>
+                        <td mat-cell *matCellDef="let row">{{ row.role }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                </table>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="demo-card demo-card--wide">
+        <mat-card-header>
+            <mat-card-title>Perguntas frequentes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-accordion>
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>Como funciona o dashboard?</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <p>Ele reúne indicadores e ações rápidas em um só lugar.</p>
+                </mat-expansion-panel>
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>Como altero minhas notificações?</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <p>Acesse Configurações e ajuste as preferências de alerta.</p>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<ng-template #confirmDialog>
+    <h2 mat-dialog-title>Confirmar ação</h2>
+    <mat-dialog-content>Esta é uma demonstração do componente Dialog do Angular Material.</mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" mat-dialog-close>Confirmar</button>
+    </mat-dialog-actions>
+</ng-template>
