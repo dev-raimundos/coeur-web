@@ -30,13 +30,19 @@
 
         @if (currentUser(); as user) {
             <mat-divider></mat-divider>
-            <button class="user-menu-trigger" [matMenuTriggerFor]="userMenu">
+            <button
+                class="user-menu-trigger"
+                [matMenuTriggerFor]="userMenu"
+                #userMenuTrigger="matMenuTrigger"
+            >
                 <span class="user-avatar">{{ userInitials() }}</span>
                 <span class="user-name">{{ userDisplayName() }}</span>
-                <mat-icon class="user-menu-caret">arrow_drop_up</mat-icon>
+                <mat-icon class="user-menu-caret" [class.user-menu-caret-open]="userMenuTrigger.menuOpen">
+                    arrow_drop_up
+                </mat-icon>
             </button>
 
-            <mat-menu #userMenu="matMenu" xPosition="after" yPosition="above">
+            <mat-menu #userMenu="matMenu" xPosition="before" yPosition="above">
                 <button mat-menu-item (click)="setTheme('light')">
                     <mat-icon>light_mode</mat-icon>
                     <span>Tema claro</span>
