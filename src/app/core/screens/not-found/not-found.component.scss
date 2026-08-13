@@ -1,0 +1,34 @@
+.error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.error-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+    color: var(--mat-sys-outline);
+}
+
+h1 {
+    margin: 16px 0 0;
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.error-title {
+    margin: 8px 0 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.error-description {
+    margin: 4px 0 24px;
+    color: var(--mat-sys-on-surface-variant);
+}
