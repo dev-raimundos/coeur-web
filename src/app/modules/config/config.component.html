@@ -1,1 +1,23 @@
 <h1>Configurações</h1>
+
+<section class="setting">
+    <div class="setting-label">
+        <h2>Tema</h2>
+        <p>Escolha entre o tema claro ou escuro da aplicação.</p>
+    </div>
+
+    <mat-button-toggle-group
+        [value]="theme()"
+        (change)="setTheme($event.value)"
+        aria-label="Tema da aplicação"
+    >
+        <mat-button-toggle value="light">
+            <mat-icon>light_mode</mat-icon>
+            Claro
+        </mat-button-toggle>
+        <mat-button-toggle value="dark">
+            <mat-icon>dark_mode</mat-icon>
+            Escuro
+        </mat-button-toggle>
+    </mat-button-toggle-group>
+</section>

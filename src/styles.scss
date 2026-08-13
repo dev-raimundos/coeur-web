@@ -146,12 +146,14 @@ html {
             inverse-tertiary: #476369,
         )
     );
+
+    // A classe `dark` é alternada dinamicamente no <html> pelo ThemeService.
+    color-scheme: dark;
 }
 
 body {
-    // Default the application to a light color theme. This can be changed to
-    // `dark` to enable the dark color theme, or to `light dark` to defer to the
-    // user's system settings.
+    // Tema padrão da aplicação; sobrescrito por `html.dark` acima quando o
+    // usuário opta pelo tema escuro nas configurações (via ThemeService).
     color-scheme: light;
 
     // Set a default background, font and text colors for the application using

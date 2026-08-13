@@ -1,0 +1,25 @@
+.setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px 0;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.setting-label {
+    h2 {
+        margin: 0 0 4px;
+        font: var(--mat-sys-title-medium);
+    }
+
+    p {
+        margin: 0;
+        color: var(--mat-sys-on-surface-variant);
+    }
+}
+
+mat-button-toggle mat-icon {
+    margin-right: 4px;
+    vertical-align: middle;
+}

@@ -7,6 +7,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApiUrlInterceptor } from './core/interceptors/api-url.interceptor';
 import { HttpErrorInterceptor } from './core/interceptors/http-error-toast.interceptor';
 import { AuthService } from './core/services/authentication/auth.service';
+import { ThemeService } from './core/services/theme/theme.service';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -18,5 +19,7 @@ export const appConfig: ApplicationConfig = {
         // Resolve isLoggedIn/currentUser via /me antes da navegação inicial, já que o
         // cookie HttpOnly não pode ser lido diretamente pelo client pra checar a sessão.
         provideAppInitializer(() => inject(AuthService).fetchCurrentUser()),
+        // Aplica o tema salvo antes da primeira renderização, pra evitar flash do tema padrão.
+        provideAppInitializer(() => void inject(ThemeService)),
     ],
 };
