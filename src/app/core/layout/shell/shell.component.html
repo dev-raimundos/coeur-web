@@ -6,13 +6,19 @@
     [fixedInViewport]="isMobile()"
     class="sidenav"
   >
-    <mat-toolbar>Menu</mat-toolbar>
+    <div class="brand">
+      <mat-icon class="brand-icon">favorite</mat-icon>
+      <span class="brand-name">Coeur</span>
+    </div>
+    <mat-divider></mat-divider>
     <mat-nav-list>
       @for (item of menuItems; track item.route) {
         <a
           mat-list-item
           [routerLink]="item.route"
-          routerLinkActive="active-link"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [activated]="rla.isActive"
         >
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
