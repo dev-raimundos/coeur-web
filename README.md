@@ -85,14 +85,3 @@ docker run -p 8080:80 coeur-web
 ```
 
 O [`nginx.conf`](nginx.conf) já resolve o fallback de SPA (`try_files ... /index.html`) e cache de assets estáticos.
-
-## Estado atual
-
-- ✅ Autenticação (login/logout/sessão), shell com navegação, guards, tema claro/escuro, toasts de erro globais.
-- 🚧 Dashboard, Usuários e as telas de gestão financeira em si ainda são placeholders — é o próximo passo.
-
-## Convenções de código
-
-- 4 espaços, aspas simples, `printWidth` 100 — tudo via Prettier (`.prettierrc`), sem configuração manual de estilo.
-- Path aliases (`@core/*`, `@shared/*`, `@app/*`, `@env`) em vez de `../../../` — ver `tsconfig.json`.
-- Comentários só quando explicam o *porquê* de uma decisão não óbvia (ex. por que um interceptor faz algo do jeito que faz); nome de variável/função é a documentação do *o quê*.
