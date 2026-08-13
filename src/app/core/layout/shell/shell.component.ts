@@ -36,7 +36,11 @@ export class ShellComponent {
     private readonly _themeService = inject(ThemeService);
     private readonly _breakpointObserver = inject(BreakpointObserver);
 
-    opened = signal(true);
+    // No celular a sidenav abre em modo overlay ('over') e por padrão cobriria a
+    // própria tela — por isso começa fechada nesse caso. `isMatched` é síncrono
+    // (ao contrário de `observe()`), então não sofre da corrida com o valor
+    // inicial de `isMobile` abaixo.
+    opened = signal(!this._breakpointObserver.isMatched(Breakpoints.Handset));
     currentUser = this._authService.currentUser;
     theme = this._themeService.theme;
 

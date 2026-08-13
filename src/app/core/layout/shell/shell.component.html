@@ -3,6 +3,7 @@
         #sidenav
         [mode]="isMobile() ? 'over' : 'side'"
         [opened]="opened()"
+        (openedChange)="opened.set($event)"
         [fixedInViewport]="isMobile()"
         class="sidenav"
     >
