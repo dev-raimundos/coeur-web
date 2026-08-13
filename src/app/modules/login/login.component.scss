@@ -60,14 +60,15 @@
 }
 
 .submit-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
     height: 44px;
     margin-top: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+
+    mat-icon {
+        margin-right: 8px;
+        vertical-align: middle;
+    }
 }
 
 .login-footer {
