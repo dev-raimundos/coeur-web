@@ -1,0 +1,43 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="opened()"
+    [fixedInViewport]="isMobile()"
+    class="sidenav"
+  >
+    <mat-toolbar>Menu</mat-toolbar>
+    <mat-nav-list>
+      @for (item of menuItems; track item.route) {
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Minha Aplicação</span>
+      <span class="spacer"></span>
+      @if (currentUser(); as user) {
+        <span class="user-name">{{ user.name }}</span>
+      }
+      <button mat-icon-button (click)="logout()" aria-label="Sair" title="Sair">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
