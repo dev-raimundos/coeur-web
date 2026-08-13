@@ -1,9 +1,3 @@
-# Coeur
-
-Aplicação web para gestão doméstica — hoje focada em controle de acesso e na casca (shell) da aplicação, com o módulo de gastos financeiros como próximo passo. É um projeto de uso pessoal (eu e minha esposa usamos pra organizar as contas de casa), mas escrito e documentado como **peça de portfólio**: o objetivo aqui é mostrar como eu estruturo um frontend Angular do zero — arquitetura, decisões técnicas e testes — não só entregar a funcionalidade.
-
-Por isso este README fala mais de **como o projeto é construído** do que do que ele faz.
-
 ## Stack
 
 | Camada | Escolha | Por quê |
