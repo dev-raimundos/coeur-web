@@ -75,7 +75,9 @@ A app espera uma API em `environment.apiUrl` (`src/environments/environment.deve
 ```bash
 npm run build                       # build de produção em dist/coeur-web/browser
 docker build -t coeur-web .          # build multi-stage: Angular -> Nginx
-docker run -p 8080:80 coeur-web
+docker run -p 4200:80 coeur-web
+# ou, via compose (mesma porta 4200, já liberada no CORS da API):
+docker compose up -d --build
 ```
 
 O [`nginx.conf`](nginx.conf) já resolve o fallback de SPA (`try_files ... /index.html`) e cache de assets estáticos.
