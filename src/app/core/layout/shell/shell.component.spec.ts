@@ -66,12 +66,7 @@ describe('ShellComponent', () => {
             id: '1',
             name: 'Ana Silva',
             email: 'ana@example.com',
-            role: 'admin',
-            isActive: true,
-            isEmailVerified: 'true',
-            createdAt: '',
-            updatedAt: null,
-            lastLoginAt: null,
+            roles: 'admin',
         });
         fixture.detectChanges();
 
@@ -85,12 +80,7 @@ describe('ShellComponent', () => {
             id: '1',
             name: 'Madonna',
             email: 'madonna@example.com',
-            role: 'admin',
-            isActive: true,
-            isEmailVerified: 'true',
-            createdAt: '',
-            updatedAt: null,
-            lastLoginAt: null,
+            roles: 'admin',
         });
         fixture.detectChanges();
 

@@ -5,7 +5,6 @@ export const ApiUrlInterceptor: HttpInterceptorFn = (request, next) => {
     if (request.url.startsWith('/')) {
         const apiRequest = request.clone({
             url: `${environment.apiUrl}${request.url}`,
-            withCredentials: true,
         });
         return next(apiRequest);
     }
