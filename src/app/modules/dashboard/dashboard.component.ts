@@ -77,7 +77,7 @@ export class DashboardComponent {
     private readonly _dialog = inject(MatDialog);
     private readonly _fb = inject(FormBuilder);
 
-    @ViewChild('confirmDialog') private _confirmDialogTemplate!: TemplateRef<unknown>;
+    @ViewChild('confirmDialog') private readonly _confirmDialogTemplate!: TemplateRef<unknown>;
 
     currentUser = this._authService.currentUser;
     isLoading = signal(false);

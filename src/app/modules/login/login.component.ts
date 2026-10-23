@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@core/services/authentication/auth.service';
+import { __await } from 'tslib';
 
 @Component({
     selector: 'app-login',
@@ -49,7 +50,7 @@ export class LoginComponent {
         this._authService.login(this.form.getRawValue()).subscribe({
             next: () => {
                 const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-                this._router.navigateByUrl(returnUrl);
+                void this._router.navigateByUrl(returnUrl);
             },
             error: () => {},
         });

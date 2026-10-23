@@ -16,7 +16,13 @@
             <button mat-raised-button color="primary">Raised</button>
             <button mat-stroked-button>Stroked</button>
             <button mat-button>Text</button>
-            <button mat-icon-button matTooltip="Notificações" matBadge="3" matBadgeSize="small" matBadgeColor="warn">
+            <button
+                mat-icon-button
+                matTooltip="Notificações"
+                matBadge="3"
+                matBadgeSize="small"
+                matBadgeColor="warn"
+            >
                 <mat-icon>notifications</mat-icon>
             </button>
             <button mat-fab color="primary" matTooltip="Adicionar">
@@ -89,7 +95,9 @@
                     </mat-slider>
                 </div>
 
-                <mat-slide-toggle formControlName="notifications">Receber notificações</mat-slide-toggle>
+                <mat-slide-toggle formControlName="notifications"
+                    >Receber notificações</mat-slide-toggle
+                >
 
                 <mat-checkbox formControlName="agree">Concordo com os termos</mat-checkbox>
 
@@ -106,12 +114,18 @@
             <mat-card-subtitle>Progresso, snackbar e diálogo</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="feedback-content">
-            <mat-progress-bar [mode]="isLoading() ? 'indeterminate' : 'determinate'" [value]="70"></mat-progress-bar>
+            <mat-progress-bar
+                [mode]="isLoading() ? 'indeterminate' : 'determinate'"
+                [value]="70"
+            ></mat-progress-bar>
 
             <div class="feedback-actions">
                 <button mat-stroked-button (click)="simulateLoading()" [disabled]="isLoading()">
                     @if (isLoading()) {
-                        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                        <mat-progress-spinner
+                            diameter="20"
+                            mode="indeterminate"
+                        ></mat-progress-spinner>
                     } @else {
                         Simular carregamento
                     }
@@ -216,7 +230,9 @@
 
 <ng-template #confirmDialog>
     <h2 mat-dialog-title>Confirmar ação</h2>
-    <mat-dialog-content>Esta é uma demonstração do componente Dialog do Angular Material.</mat-dialog-content>
+    <mat-dialog-content
+        >Esta é uma demonstração do componente Dialog do Angular Material.</mat-dialog-content
+    >
     <mat-dialog-actions align="end">
         <button mat-button mat-dialog-close>Cancelar</button>
         <button mat-flat-button color="primary" mat-dialog-close>Confirmar</button>
