@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { effect, inject, Injectable, signal } from '@angular/core';
+import { StorageService } from '@core/services/storage/storage.service';
 
 export type Theme = 'light' | 'dark';
 
@@ -11,6 +12,7 @@ const DARK_CLASS = 'dark';
 })
 export class ThemeService {
     private readonly _document = inject(DOCUMENT);
+    private readonly _storage = inject(StorageService);
 
     private readonly _theme = signal<Theme>(this._readStoredTheme());
     public readonly theme = this._theme.asReadonly();
@@ -25,13 +27,12 @@ export class ThemeService {
      * @param theme
      */
     public setTheme(theme: Theme): void {
-        this._document.defaultView?.localStorage.setItem(STORAGE_KEY, theme);
         this._theme.set(theme);
+        this._storage.set(STORAGE_KEY, theme);
     }
 
     private _readStoredTheme(): Theme {
-        const stored = this._document.defaultView?.localStorage.getItem(STORAGE_KEY);
-        return stored === 'dark' ? 'dark' : 'light';
+        return this._storage.get(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
     }
 
     private _applyTheme(theme: Theme): void {
