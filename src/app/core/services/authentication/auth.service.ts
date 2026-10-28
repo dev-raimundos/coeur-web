@@ -123,7 +123,7 @@ export class AuthService {
         this._clearTokens();
         this._currentUser.set(null);
         this._isLoggedIn.set(false);
-        this._router.navigate(['/login']);
+        void this._router.navigate(['/login']);
     }
 
     private _storeTokens(tokens: TokenResponse): void {
