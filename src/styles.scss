@@ -158,6 +158,10 @@ body {
     --mat-snack-bar-button-color: var(--mat-sys-on-error);
 }
 
+.user-preferences-menu.mat-mdc-menu-panel {
+    translate: min(50%, max(0px, calc(100vw - 288px))) 0;
+}
+
 .app-toast-warning {
     --mdc-snackbar-container-color: #a15c00;
     --mdc-snackbar-supporting-text-color: #fff;
