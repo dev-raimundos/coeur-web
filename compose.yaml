@@ -2,7 +2,7 @@ services:
   coeur-web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: .docker/Dockerfile
     restart: unless-stopped
     ports:
       - '4200:80'
