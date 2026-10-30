@@ -5,7 +5,7 @@
 This is an Angular 21 application using standalone components, signals, Angular Material 3, and SCSS.
 
 - `src/app/core/`: authentication, guards, interceptors, layout, and infrastructure services.
-- `src/app/modules/`: features such as `usuarios`, `login`, `dashboard`, and `config`. Larger features separate `pages/`, `components/`, `services/`, and `models/`.
+- `src/app/modules/`: features such as `users`, `login`, `dashboard`, and `config`. Larger features separate `pages/`, `components/`, `services/`, and `models/`.
 - `src/app/shared/`: reusable models, pipes, and services. Move cross-feature code here or into `core` instead of importing one feature into another.
 - `src/environments/`: build-specific API configuration; `public/`: static assets.
 - Tests live beside their implementation as `*.spec.ts`. Docker and Nginx configuration lives in `.docker/`; CI lives in `.github/workflows/ci.yml`.
@@ -26,7 +26,7 @@ Use Node.js 24, matching CI, and npm (pinned in `package.json`).
 
 Use four-space indentation, UTF-8, and final newlines per `.editorconfig`. Prettier uses single quotes and a 100-character print width. Keep TypeScript strict and follow the Angular/TypeScript ESLint rules, including template accessibility checks.
 
-Use kebab-case filenames with descriptive suffixes, such as `user-list.component.ts` and `user.service.ts`. Component selectors use `app-` plus kebab-case; directive selectors use the `app` prefix with camelCase. Prefer standalone components and signals for UI state. Use configured aliases such as `@core/*`, `@shared/*`, and `@env`.
+Use English names for code, files, and directories. Keep user-facing copy in Portuguese. Use kebab-case filenames with descriptive suffixes, such as `user-list.component.ts` and `user.service.ts`. Component selectors use `app-` plus kebab-case; directive selectors use the `app` prefix with camelCase. Prefer standalone components and signals for UI state. Use configured aliases such as `@core/*`, `@shared/*`, and `@env`.
 
 ## Testing Guidelines
 

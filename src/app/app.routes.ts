@@ -22,7 +22,7 @@ export const routes: Routes = [
             {
                 path: 'usuarios',
                 loadComponent: () =>
-                    import('./modules/usuarios/pages/usuarios/usuarios.page').then((m) => m.UsuariosPage),
+                    import('./modules/users/pages/users/users.page').then((m) => m.UsersPage),
             },
             {
                 path: 'config',

@@ -4,9 +4,9 @@ import { UserActionsService } from '../../services/user-actions.service';
 import { UserService } from '../../services/user.service';
 
 @Component({
-    selector: 'app-usuarios-page',
+    selector: 'app-users-page',
     imports: [UserListComponent],
     providers: [UserService, UserActionsService],
     template: '<app-user-list />',
 })
-export class UsuariosPage {}
+export class UsersPage {}

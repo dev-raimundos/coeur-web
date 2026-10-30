@@ -3,17 +3,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Subscription, switchMap } from 'rxjs';
 import { UserFormService } from '../../services/user-form.service';
 import { DeleteUserService } from '../../services/delete-user.service';
-import { DeleteUserRequest, UserPage } from '../../models/user-management.model';
+import { UserPage } from '../../models/user-management.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { User } from '@shared/models/user.model';
+import { UserDialogData, UserDialogResult } from '../../models/user-dialog.model';
 import {
-    DeleteUserDialogData,
-    UserDialogData,
-    UserDialogResult,
-} from '../../models/user-dialog.model';
-import { DeleteUserDialogComponent } from '../delete-user-dialog/delete-user-dialog.component';
+    ConfirmationDialogComponent,
+    ConfirmationDialogData,
+} from '@shared/components/confirmation-dialog/confirmation-dialog.component';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -121,17 +120,23 @@ export class UserListComponent implements OnInit {
         if (this.busy()) return;
         const isCurrentUser = user.id === this._auth.currentUser()?.id;
         this._dialog
-            .open<DeleteUserDialogComponent, DeleteUserDialogData, DeleteUserRequest>(
-                DeleteUserDialogComponent,
+            .open<ConfirmationDialogComponent, ConfirmationDialogData, boolean>(
+                ConfirmationDialogComponent,
                 {
-                    data: { user, isCurrentUser },
+                    data: {
+                        title: 'Excluir usuário?',
+                        content: `A conta de ${user.name} (${user.email}) será excluída permanentemente.\n\nEsta ação não pode ser desfeita.${isCurrentUser ? '\n\nVocê está excluindo sua própria conta e sairá da aplicação.' : ''}`,
+                        confirmLabel: 'Excluir usuário',
+                    },
                     width: '440px',
                     maxWidth: 'calc(100vw - 32px)',
                 },
             )
             .afterClosed()
             .pipe(
-                switchMap((dto) => (dto?.id === user.id ? this.deletion.delete(user.id) : EMPTY)),
+                switchMap((confirmed) =>
+                    confirmed === true ? this.deletion.delete(user.id) : EMPTY,
+                ),
                 takeUntilDestroyed(this._destroyRef),
             )
             .subscribe({

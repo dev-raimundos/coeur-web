@@ -77,19 +77,21 @@ describe('UserListComponent', () => {
     it('does not reload when deletion is cancelled', () => {
         actions.remove(user);
         expect(api.list).not.toHaveBeenCalled();
+        expect(api.delete).not.toHaveBeenCalled();
         expect(auth.logout).not.toHaveBeenCalled();
     });
 
     it('reloads after deleting another account', () => {
-        dialog.open.mockReturnValue({ afterClosed: () => of({ id: user.id }) });
+        dialog.open.mockReturnValue({ afterClosed: () => of(true) });
         actions.remove(user);
         expect(api.list).toHaveBeenCalledOnce();
     });
 
     it('logs out after deleting the current account', () => {
         auth.currentUser.set(user);
-        dialog.open.mockReturnValue({ afterClosed: () => of({ id: user.id }) });
+        dialog.open.mockReturnValue({ afterClosed: () => of(true) });
         actions.remove(user);
+        expect(dialog.open.mock.calls[0][1].data.content).toContain('sua própria conta');
         expect(auth.logout).toHaveBeenCalledOnce();
     });
 
@@ -108,8 +110,8 @@ describe('UserListComponent', () => {
         expect(api.list).not.toHaveBeenCalled();
     });
 
-    it('ignores a deletion DTO for a different user', () => {
-        dialog.open.mockReturnValue({ afterClosed: () => of({ id: 'different-user' }) });
+    it('requires explicit confirmation before deleting', () => {
+        dialog.open.mockReturnValue({ afterClosed: () => of(false) });
         actions.remove(user);
         expect(api.delete).not.toHaveBeenCalled();
     });

@@ -7,12 +7,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { UserListComponent } from '../../components/user-list/user-list.component';
-import { UsuariosPage } from './usuarios.page';
+import { UsersPage } from './users.page';
 
-describe('UsuariosPage', () => {
+describe('UsersPage', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [UsuariosPage],
+            imports: [UsersPage],
             providers: [
                 provideHttpClient(),
                 provideHttpClientTesting(),
@@ -24,7 +24,7 @@ describe('UsuariosPage', () => {
     });
 
     it('composes the list without making the scroll container focusable', async () => {
-        const fixture = TestBed.createComponent(UsuariosPage);
+        const fixture = TestBed.createComponent(UsersPage);
         fixture.detectChanges();
         TestBed.inject(HttpTestingController)
             .expectOne((req) => req.url === '/api/v1/users')
@@ -45,8 +45,8 @@ describe('UsuariosPage', () => {
     });
 
     it('keeps each page instance state isolated', async () => {
-        const first = TestBed.createComponent(UsuariosPage);
-        const second = TestBed.createComponent(UsuariosPage);
+        const first = TestBed.createComponent(UsersPage);
+        const second = TestBed.createComponent(UsersPage);
         first.detectChanges();
         second.detectChanges();
         const http = TestBed.inject(HttpTestingController);
