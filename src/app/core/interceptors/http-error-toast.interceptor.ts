@@ -3,33 +3,37 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { ToastService, ToastType } from '../services/notification/toast/toast.service';
 
-interface ProblemDetailsToast {
-    type: ToastType;
-    message: string;
+interface ApiError {
+    detail?: string;
+    title?: string;
+    toast?: { message?: string; type?: ToastType };
 }
 
+const notifiedErrors = new WeakSet<HttpErrorResponse>();
 const FALLBACK_MESSAGE = 'Não foi possível completar a operação. Tente novamente.';
 const OFFLINE_MESSAGE = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
 
-/**
- * exibe o que a API já manda em toda resposta Problem Details (extensão "toast",
- * ver CustomizeProblemDetails na API) — sem opção de customização por chamada. Um
- * component que precise de um toast próprio usa o ToastService diretamente.
- */
+// Authentication handles 401 responses. Report other failures once, including refresh failures.
 export const HttpErrorInterceptor: HttpInterceptorFn = (request, next) => {
     const toast = inject(ToastService);
-
     return next(request).pipe(
         catchError((error: unknown) => {
-            if (error instanceof HttpErrorResponse) {
-                const problemToast = (error.error as { toast?: ProblemDetailsToast } | null)?.toast;
-
+            if (
+                error instanceof HttpErrorResponse &&
+                error.status !== 401 &&
+                !notifiedErrors.has(error)
+            ) {
+                notifiedErrors.add(error);
+                const body: ApiError | null = typeof error.error === 'object' ? error.error : null;
+                const message = [body?.toast?.message, body?.detail, body?.title].find(
+                    (value) => typeof value === 'string' && value.trim().length > 0,
+                );
+                const type = body?.toast?.type;
                 toast.show(
-                    problemToast?.message ?? (error.status === 0 ? OFFLINE_MESSAGE : FALLBACK_MESSAGE),
-                    problemToast?.type ?? 'error',
+                    error.status === 0 ? OFFLINE_MESSAGE : (message ?? FALLBACK_MESSAGE),
+                    type === 'warning' || type === 'info' ? type : 'error',
                 );
             }
-
             return throwError(() => error);
         }),
     );

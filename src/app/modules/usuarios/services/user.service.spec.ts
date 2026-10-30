@@ -7,7 +7,9 @@ describe('UserService', () => {
     let service: UserService;
     let http: HttpTestingController;
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+        TestBed.configureTestingModule({
+            providers: [provideHttpClient(), provideHttpClientTesting()],
+        });
         service = TestBed.inject(UserService);
         http = TestBed.inject(HttpTestingController);
     });
@@ -42,5 +44,28 @@ describe('UserService', () => {
         const deletion = http.expectOne('/api/v1/users/user-1');
         expect(deletion.request.method).toBe('DELETE');
         deletion.flush(null, { status: 204, statusText: 'No Content' });
+    });
+    it('clears loading after failure and allows retry', () => {
+        service.list(0, 10, 'name,asc').subscribe({ error: () => {} });
+        expect(service.loading()).toBe(true);
+        http.expectOne((req) => req.url === '/api/v1/users').flush('failed', {
+            status: 500,
+            statusText: 'Error',
+        });
+        expect(service.loading()).toBe(false);
+        service.list(0, 10, 'name,asc').subscribe();
+        http.expectOne((req) => req.url === '/api/v1/users').flush({
+            content: [],
+            totalElements: 0,
+        });
+        expect(service.loading()).toBe(false);
+    });
+
+    it('clears loading when the caller cancels', () => {
+        const subscription = service.list(0, 10, 'name,asc').subscribe();
+        const request = http.expectOne((req) => req.url === '/api/v1/users');
+        subscription.unsubscribe();
+        expect(request.cancelled).toBe(true);
+        expect(service.loading()).toBe(false);
     });
 });

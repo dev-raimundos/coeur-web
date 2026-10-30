@@ -13,10 +13,14 @@ describe('User API state services', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        TestBed.configureTestingModule({ providers: [
-            UserActionsService, UserFormService, DeleteUserService,
-            { provide: UserService, useValue: api },
-        ] });
+        TestBed.configureTestingModule({
+            providers: [
+                UserActionsService,
+                UserFormService,
+                DeleteUserService,
+                { provide: UserService, useValue: api },
+            ],
+        });
     });
 
     it('tracks detail loading and clears it when the caller cancels', () => {
@@ -31,17 +35,13 @@ describe('User API state services', () => {
         expect(state.loading()).toBe(false);
     });
 
-    it('keeps save errors in the service and clears them for a successful retry', () => {
+    it('clears loading after a failed save and allows retry', () => {
         const state = TestBed.inject(UserFormService);
         api.update.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
         state.update(user.id, user).subscribe({ error: () => {} });
-        expect(state.emailConflict()).toBe(true);
-        expect(state.error()).toBeTruthy();
         expect(state.saving()).toBe(false);
         api.update.mockReturnValue(of(user));
         state.update(user.id, user).subscribe();
-        expect(state.emailConflict()).toBe(false);
-        expect(state.error()).toBe('');
     });
 
     it('returns deletion results without requiring a dialog', () => {

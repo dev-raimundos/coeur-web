@@ -1,3 +1,5 @@
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { PaginatorIntlService } from '@shared/services/paginator-intl.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -12,9 +14,11 @@ import { map } from 'rxjs';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { Theme, ThemeService } from '@core/services/theme/theme.service';
+import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
 
 @Component({
     selector: 'app-shell',
+    providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlService }],
     standalone: true,
     imports: [
         MatSidenavModule,
@@ -24,9 +28,10 @@ import { Theme, ThemeService } from '@core/services/theme/theme.service';
         MatButtonModule,
         MatDividerModule,
         MatMenuModule,
+        UserInitialsPipe,
         RouterLink,
         RouterLinkActive,
-        RouterOutlet
+        RouterOutlet,
     ],
     templateUrl: './shell.component.html',
     styleUrl: './shell.component.scss',
@@ -40,14 +45,11 @@ export class ShellComponent {
     currentUser = this._authService.currentUser;
     theme = this._themeService.theme;
 
-    userInitials = computed(() => this._initialsOf(this.currentUser()?.name));
     userDisplayName = computed(() => this._firstAndLastNameOf(this.currentUser()?.name));
 
     isMobile = toSignal(
-        this._breakpointObserver.observe(Breakpoints.Handset).pipe(
-            map((result) => result.matches)
-        ),
-        { initialValue: false }
+        this._breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
+        { initialValue: false },
     );
 
     toggleSidenav() {
@@ -68,19 +70,10 @@ export class ShellComponent {
         { label: 'Configurações', icon: 'settings', route: '/config' },
     ];
 
-    private _initialsOf(name: string | undefined): string {
-        const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
-        if (parts.length === 0) {
-            return '';
-        }
-        if (parts.length === 1) {
-            return parts[0].charAt(0).toUpperCase();
-        }
-        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-    }
-
     private _firstAndLastNameOf(name: string | undefined): string {
         const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
-        return [parts[0], parts.length > 1 ? parts[parts.length - 1] : undefined].filter(Boolean).join(' ');
+        return [parts[0], parts.length > 1 ? parts[parts.length - 1] : undefined]
+            .filter(Boolean)
+            .join(' ');
     }
 }

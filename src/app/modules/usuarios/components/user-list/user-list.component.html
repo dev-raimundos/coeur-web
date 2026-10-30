@@ -9,48 +9,35 @@
         </button>
     </header>
 
-    @if (details.error() || mutation.error() || deletion.error()) {
-        <p class="load-error" role="alert">
-            {{ details.error() || mutation.error() || deletion.error() }}
-        </p>
-    }
-
     <mat-card
         appearance="outlined"
         class="users-card"
-        [attr.aria-busy]="state.loading() || details.loading() || busy()"
+        [attr.aria-busy]="api.loading() || details.loading() || busy()"
     >
         <div class="list-toolbar">
             <h2>
-                Contas cadastradas <span class="count">{{ state.total() }}</span>
+                Contas cadastradas <span class="count">{{ page().totalElements }}</span>
             </h2>
             <button
                 mat-icon-button
-                (click)="state.reload()"
-                [disabled]="state.loading()"
+                (click)="reload()"
+                [disabled]="api.loading()"
                 aria-label="Atualizar lista de usuários"
             >
                 <mat-icon>refresh</mat-icon>
             </button>
         </div>
         <div class="progress-slot" aria-live="polite">
-            @if (state.loading() || details.loading() || busy()) {
+            @if (api.loading() || details.loading() || busy()) {
                 <mat-progress-bar mode="indeterminate" aria-label="Carregando usuários" />
             }
         </div>
 
-        @if (state.failed()) {
-            <div class="empty-state" role="alert">
-                <mat-icon>cloud_off</mat-icon>
-                <h3>Não foi possível carregar os usuários</h3>
-                <p>Verifique sua conexão e tente novamente.</p>
-                <button mat-stroked-button (click)="state.reload()">Tentar novamente</button>
-            </div>
-        } @else if (!state.loading() && state.users().length === 0) {
+        @if (!api.loading() && page().content.length === 0) {
             <div class="empty-state">
                 <mat-icon>group</mat-icon>
-                <h3>Nenhum usuário cadastrado</h3>
-                <p>Adicione uma conta para começar.</p>
+                <h3>Nenhum usuário para exibir</h3>
+                <p>Atualize a lista ou adicione uma nova conta.</p>
                 <button mat-flat-button (click)="create()" [disabled]="busy()">
                     <mat-icon>person_add</mat-icon>Novo usuário
                 </button>
@@ -60,12 +47,12 @@
                 <table
                     mat-table
                     aria-label="Usuários cadastrados"
-                    [dataSource]="state.users()"
+                    [dataSource]="page().content"
                     matSort
-                    [matSortActive]="state.sort().active"
-                    [matSortDirection]="state.sort().direction"
+                    [matSortActive]="sort().active"
+                    [matSortDirection]="sort().direction"
                     matSortDisableClear
-                    (matSortChange)="state.changeSort($event)"
+                    (matSortChange)="changeSort($event)"
                 >
                     <ng-container matColumnDef="name">
                         <th
@@ -114,7 +101,7 @@
                             <button
                                 mat-icon-button
                                 [matMenuTriggerFor]="userActionsMenu"
-                                [disabled]="details.loading() || busy() || state.loading()"
+                                [disabled]="details.loading() || busy() || api.loading()"
                                 [attr.aria-label]="'Ações de ' + user.name"
                             >
                                 <mat-icon>more_vert</mat-icon>
@@ -138,13 +125,13 @@
             </div>
         }
         <mat-paginator
-            [length]="state.total()"
-            [pageIndex]="state.pageIndex()"
-            [pageSize]="state.pageSize()"
+            [length]="page().totalElements"
+            [pageIndex]="pageIndex()"
+            [pageSize]="pageSize()"
             [pageSizeOptions]="[10, 20, 50]"
-            [disabled]="state.loading() || state.failed()"
+            [disabled]="api.loading()"
             showFirstLastButtons
-            (page)="state.changePage($event)"
+            (page)="changePage($event)"
             aria-label="Paginação de usuários"
         />
     </mat-card>

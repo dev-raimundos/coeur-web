@@ -1,9 +1,9 @@
-import { Component, computed, DestroyRef, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, switchMap } from 'rxjs';
+import { EMPTY, Subscription, switchMap } from 'rxjs';
 import { UserFormService } from '../../services/user-form.service';
 import { DeleteUserService } from '../../services/delete-user.service';
-import { DeleteUserRequest } from '../../models/user-management.model';
+import { DeleteUserRequest, UserPage } from '../../models/user-management.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
@@ -20,14 +20,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSortModule } from '@angular/material/sort';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { UserActionsService } from '../../services/user-actions.service';
-import { UsersPaginatorIntl } from '../../services/users-paginator-intl.service';
-import { UsersStateService } from '../../services/users-state.service';
-import { UserInitialsPipe } from '../../pipes/user-initials.pipe';
+import { UserService } from '../../services/user.service';
+import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
 
 @Component({
     selector: 'app-user-list',
@@ -43,16 +42,12 @@ import { UserInitialsPipe } from '../../pipes/user-initials.pipe';
         MatTableModule,
         UserInitialsPipe,
     ],
-    providers: [
-        UserFormService,
-        DeleteUserService,
-        { provide: MatPaginatorIntl, useClass: UsersPaginatorIntl },
-    ],
+    providers: [UserFormService, DeleteUserService],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.scss',
 })
-export class UserListComponent {
-    readonly state = inject(UsersStateService);
+export class UserListComponent implements OnInit {
+    readonly api = inject(UserService);
     readonly details = inject(UserActionsService);
     readonly mutation = inject(UserFormService);
     readonly deletion = inject(DeleteUserService);
@@ -62,6 +57,50 @@ export class UserListComponent {
     private readonly _auth = inject(AuthService);
     private readonly _destroyRef = inject(DestroyRef);
     readonly columns = ['name', 'email', 'roles', 'actions'];
+
+    readonly page = signal<UserPage>({ content: [], totalElements: 0 });
+    readonly pageIndex = signal(0);
+    readonly pageSize = signal(10);
+    readonly sort = signal<Sort>({ active: 'name', direction: 'asc' });
+    private _listRequest?: Subscription;
+
+    reload(): void {
+        this._listRequest?.unsubscribe();
+        const { active, direction } = this.sort();
+        this._listRequest = this.api
+            .list(this.pageIndex(), this.pageSize(), `${active},${direction}`)
+            .pipe(takeUntilDestroyed(this._destroyRef))
+            .subscribe({
+                next: (page) => {
+                    this.page.set(page);
+                    const lastPage = Math.max(
+                        0,
+                        Math.ceil(page.totalElements / this.pageSize()) - 1,
+                    );
+                    if (this.pageIndex() > lastPage) {
+                        this.pageIndex.set(lastPage);
+                        this.reload();
+                    }
+                },
+                error: () => {},
+            });
+    }
+
+    changePage(event: PageEvent): void {
+        this.pageIndex.set(event.pageIndex);
+        this.pageSize.set(event.pageSize);
+        this.reload();
+    }
+
+    changeSort(sort: Sort): void {
+        this.sort.set(sort.direction ? sort : { active: 'name', direction: 'asc' });
+        this.pageIndex.set(0);
+        this.reload();
+    }
+
+    ngOnInit(): void {
+        this.reload();
+    }
 
     create(): void {
         if (!this.busy()) this._openDialog({ mode: 'create' });
@@ -99,7 +138,7 @@ export class UserListComponent {
                 next: () => {
                     this._toast.info('Usuário excluído.');
                     if (isCurrentUser) this._auth.logout();
-                    else this.state.reload();
+                    else this.reload();
                 },
                 error: () => {},
             });
@@ -137,7 +176,7 @@ export class UserListComponent {
                             .pipe(takeUntilDestroyed(this._destroyRef))
                             .subscribe();
                     }
-                    this.state.reload();
+                    this.reload();
                 },
                 error: () => {},
             });

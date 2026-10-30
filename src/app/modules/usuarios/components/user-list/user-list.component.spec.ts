@@ -8,12 +8,16 @@ import { User } from '@shared/models/user.model';
 import { UserListComponent } from './user-list.component';
 import { UserActionsService } from '../../services/user-actions.service';
 import { UserService } from '../../services/user.service';
-import { UsersStateService } from '../../services/users-state.service';
 
 describe('UserListComponent', () => {
     const user: User = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
-    const api = { get: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() };
-    const state = { reload: vi.fn() };
+    const api = {
+        list: vi.fn(),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+    };
     const dialog = { open: vi.fn() };
     const auth = {
         currentUser: signal<User | null>(null),
@@ -25,6 +29,7 @@ describe('UserListComponent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         api.get.mockReturnValue(of(user));
+        api.list.mockReturnValue(of({ content: [user], totalElements: 1 }));
         api.create.mockReturnValue(of(user));
         api.update.mockReturnValue(of(user));
         api.delete.mockReturnValue(of(undefined));
@@ -36,7 +41,6 @@ describe('UserListComponent', () => {
             providers: [
                 UserActionsService,
                 { provide: UserService, useValue: api },
-                { provide: UsersStateService, useValue: state },
                 { provide: MatDialog, useValue: dialog },
                 { provide: AuthService, useValue: auth },
                 { provide: ToastService, useValue: { info: vi.fn() } },
@@ -50,7 +54,7 @@ describe('UserListComponent', () => {
         actions.open(user, 'edit');
         expect(api.get).toHaveBeenCalledWith(user.id);
         expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'edit', user });
-        expect(state.reload).toHaveBeenCalledOnce();
+        expect(api.list).toHaveBeenCalledOnce();
     });
 
     it('prevents duplicate detail requests', () => {
@@ -67,19 +71,19 @@ describe('UserListComponent', () => {
         });
         actions.create();
         expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'create' });
-        expect(state.reload).toHaveBeenCalledOnce();
+        expect(api.list).toHaveBeenCalledOnce();
     });
 
     it('does not reload when deletion is cancelled', () => {
         actions.remove(user);
-        expect(state.reload).not.toHaveBeenCalled();
+        expect(api.list).not.toHaveBeenCalled();
         expect(auth.logout).not.toHaveBeenCalled();
     });
 
     it('reloads after deleting another account', () => {
         dialog.open.mockReturnValue({ afterClosed: () => of({ id: user.id }) });
         actions.remove(user);
-        expect(state.reload).toHaveBeenCalledOnce();
+        expect(api.list).toHaveBeenCalledOnce();
     });
 
     it('logs out after deleting the current account', () => {
@@ -101,7 +105,7 @@ describe('UserListComponent', () => {
             actions.create();
         }
         expect(api.create).not.toHaveBeenCalled();
-        expect(state.reload).not.toHaveBeenCalled();
+        expect(api.list).not.toHaveBeenCalled();
     });
 
     it('ignores a deletion DTO for a different user', () => {
@@ -110,11 +114,11 @@ describe('UserListComponent', () => {
         expect(api.delete).not.toHaveBeenCalled();
     });
 
-    it('keeps API errors in the parent without showing success', () => {
+    it('does not reload or leave loading active after an API error', () => {
         api.update.mockReturnValue(throwError(() => new Error('failed')));
         dialog.open.mockReturnValue({ afterClosed: () => of(user) });
         actions.open(user, 'edit');
-        expect(actions.mutation.error()).toBeTruthy();
-        expect(state.reload).not.toHaveBeenCalled();
+        expect(actions.mutation.saving()).toBe(false);
+        expect(api.list).not.toHaveBeenCalled();
     });
 });

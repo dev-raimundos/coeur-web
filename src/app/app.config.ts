@@ -1,4 +1,9 @@
-import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+    ApplicationConfig,
+    inject,
+    provideAppInitializer,
+    provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 
@@ -15,7 +20,9 @@ export const appConfig: ApplicationConfig = {
         provideBrowserGlobalErrorListeners(),
         provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
         { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
-        provideHttpClient(withInterceptors([ApiUrlInterceptor, HttpErrorInterceptor, AuthTokenInterceptor])),
+        provideHttpClient(
+            withInterceptors([ApiUrlInterceptor, HttpErrorInterceptor, AuthTokenInterceptor]),
+        ),
         provideAppInitializer(() => inject(AuthService).fetchCurrentUser()),
         provideAppInitializer(() => void inject(ThemeService)),
     ],

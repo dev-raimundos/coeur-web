@@ -1,3 +1,5 @@
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { PaginatorIntlService } from '@shared/services/paginator-intl.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
@@ -39,6 +41,12 @@ describe('ShellComponent', () => {
         fixture = TestBed.createComponent(ShellComponent);
         component = fixture.componentInstance;
         await fixture.whenStable();
+    });
+
+    it('provides the shared translation to all paginators inside the authenticated layout', () => {
+        const intl = fixture.debugElement.injector.get(MatPaginatorIntl);
+        expect(intl).toBeInstanceOf(PaginatorIntlService);
+        expect(intl.itemsPerPageLabel).toBe('Itens por página:');
     });
 
     it('should create', () => {
@@ -87,6 +95,19 @@ describe('ShellComponent', () => {
         const compiled = fixture.nativeElement as HTMLElement;
         expect(compiled.querySelector('.user-avatar')?.textContent).toContain('M');
         expect(compiled.querySelector('.user-name')?.textContent).toContain('Madonna');
+    });
+
+    it('should use the first and second names for initials when there are more names', () => {
+        currentUser.set({
+            id: '1',
+            name: '  Ana   Silva Costa  ',
+            email: 'ana@example.com',
+            roles: 'ROLE_USER',
+        });
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.querySelector('.user-avatar')?.textContent?.trim()).toBe('AS');
     });
 
     it('should not display the user menu when there is no logged in user', () => {
