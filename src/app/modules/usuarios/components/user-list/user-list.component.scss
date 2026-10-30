@@ -1,0 +1,152 @@
+@use '@angular/material' as mat;
+
+.load-error { color: var(--mat-sys-error); }
+
+.users-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    h1 {
+        margin: 0 0 8px;
+        font: var(--mat-sys-headline-large);
+    }
+    p {
+        margin: 0;
+        color: var(--mat-sys-on-surface-variant);
+        font: var(--mat-sys-body-large);
+    }
+    button {
+        flex-shrink: 0;
+    }
+}
+.users-card {
+    @include mat.card-overrides((
+        outlined-container-shape: var(--mat-sys-corner-extra-large),
+        outlined-container-color: var(--mat-sys-surface),
+    ));
+    overflow: hidden;
+}
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px 12px;
+    h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font: var(--mat-sys-title-medium);
+    }
+}
+.count {
+    padding: 2px 10px;
+    border-radius: var(--mat-sys-corner-full);
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font: var(--mat-sys-label-medium);
+}
+.progress-slot {
+    height: 4px;
+}
+.table-scroll {
+    overflow-x: auto;
+}
+table {
+    @include mat.table-overrides((
+        background-color: var(--mat-sys-surface),
+        row-item-outline-color: var(--mat-sys-outline-variant),
+    ));
+    width: 100%;
+}
+th {
+    background: var(--mat-sys-surface-container-low);
+}
+td,
+th {
+    padding: 12px 20px;
+}
+.mat-column-actions {
+    width: 48px;
+    text-align: right;
+}
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 160px;
+}
+.user-name {
+    font: var(--mat-sys-body-medium);
+    overflow-wrap: anywhere;
+}
+.avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: var(--mat-sys-corner-full);
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    font: var(--mat-sys-label-large);
+}
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 56px 24px;
+    > mat-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 48px;
+        color: var(--mat-sys-primary);
+        margin-bottom: 16px;
+    }
+    h3 {
+        margin: 0 0 8px;
+        font: var(--mat-sys-title-large);
+    }
+    p {
+        margin: 0 0 24px;
+        color: var(--mat-sys-on-surface-variant);
+    }
+}
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+@media (max-width: 599px) {
+    .users-page {
+        padding: 8px 0;
+    }
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .page-header h1 {
+        font: var(--mat-sys-headline-medium);
+    }
+    .list-toolbar {
+        padding-inline: 16px;
+    }
+    td,
+    th {
+        padding-inline: 16px;
+    }
+}

@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+<form (ngSubmit)="submit()" [formGroup]="form">
+    <mat-dialog-content>
+        @if (isDetails) {
+            <p class="description">Dados do cadastro selecionado.</p>
+            <p class="user-id"><span>Identificador</span>{{ user?.id }}</p>
+        } @else {
+            <p class="description">{{ isCreate ? 'Preencha os dados para criar uma conta.' : 'Atualize os dados e as permissões da conta.' }}</p>
+        }
+        <mat-form-field appearance="outline">
+            <mat-label>Nome completo</mat-label>
+            <input matInput formControlName="name" [readonly]="isDetails || state.saving()" autocomplete="name" maxlength="100" />
+            @if (form.controls.name.invalid) { <mat-error>Informe um nome com até 100 caracteres.</mat-error> }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>E-mail</mat-label>
+            <input matInput type="email" formControlName="email" [readonly]="isDetails || state.saving()" autocomplete="email" maxlength="100" />
+            @if (form.controls.email.hasError('conflict')) {
+                <mat-error>Este e-mail já está em uso.</mat-error>
+            } @else if (form.controls.email.invalid) {
+                <mat-error>Informe um e-mail válido com até 100 caracteres.</mat-error>
+            }
+        </mat-form-field>
+        @if (isCreate) {
+            <mat-form-field appearance="outline">
+                <mat-label>Senha inicial</mat-label>
+                <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" [readonly]="state.saving()" autocomplete="new-password" maxlength="100" />
+                <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()" [attr.aria-label]="hidePassword() ? 'Mostrar senha' : 'Ocultar senha'" [attr.aria-pressed]="!hidePassword()">
+                    <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+                </button>
+                @if (form.controls.password.invalid) { <mat-error>Informe uma senha com até 100 caracteres.</mat-error> }
+            </mat-form-field>
+            <p class="description">A nova conta receberá a permissão padrão ROLE_USER.</p>
+        } @else {
+            <mat-form-field appearance="outline">
+                <mat-label>Permissões</mat-label>
+                <input matInput formControlName="roles" [readonly]="isDetails || state.saving()" />
+                @if (!isDetails) { <mat-hint>Exemplo: ROLE_USER</mat-hint> }
+                @if (form.controls.roles.invalid) { <mat-error>Informe as permissões da conta.</mat-error> }
+            </mat-form-field>
+        }
+        @if (state.error()) { <p class="form-error" role="alert">{{ state.error() }}</p> }
+        @if (state.saving()) { <mat-progress-bar mode="indeterminate" aria-label="Salvando usuário" /> }
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" mat-dialog-close [disabled]="state.saving()">{{ isDetails ? 'Fechar' : 'Cancelar' }}</button>
+        @if (!isDetails) {
+            <button mat-flat-button type="submit" [disabled]="state.saving()">{{ state.saving() ? 'Salvando…' : submitLabel }}</button>
+        }
+    </mat-dialog-actions>
+</form>

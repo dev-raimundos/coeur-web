@@ -1,0 +1,34 @@
+@use '@angular/material' as mat;
+
+:host {
+    @include mat.dialog-overrides((actions-padding: 16px 24px 24px));
+}
+
+mat-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.description {
+    margin: 0 0 8px;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-medium);
+}
+
+.user-id {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
+    font: var(--mat-sys-body-small);
+
+    span { color: var(--mat-sys-on-surface-variant); }
+}
+
+.form-error {
+    color: var(--mat-sys-error);
+    margin: 0;
+}
+
+mat-dialog-actions { gap: 8px; }

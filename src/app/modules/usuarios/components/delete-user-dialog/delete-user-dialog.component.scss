@@ -1,0 +1,17 @@
+@use '@angular/material' as mat;
+
+:host {
+    @include mat.dialog-overrides((actions-padding: 16px 24px 24px));
+}
+
+.delete-button {
+    @include mat.button-overrides((
+        filled-container-color: var(--mat-sys-error),
+        filled-label-text-color: var(--mat-sys-on-error),
+        filled-state-layer-color: var(--mat-sys-on-error),
+    ));
+}
+
+.error { color: var(--mat-sys-error); }
+mat-dialog-content { overflow-wrap: anywhere; }
+mat-dialog-actions { gap: 8px; }
