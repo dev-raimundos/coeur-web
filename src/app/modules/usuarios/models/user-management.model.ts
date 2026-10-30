@@ -16,3 +16,7 @@ export interface UpdateUserRequest {
     email: string;
     roles: string;
 }
+
+export interface DeleteUserRequest {
+    id: string;
+}

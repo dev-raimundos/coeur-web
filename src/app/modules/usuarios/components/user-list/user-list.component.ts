@@ -1,10 +1,18 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, switchMap } from 'rxjs';
+import { UserFormService } from '../../services/user-form.service';
+import { DeleteUserService } from '../../services/delete-user.service';
+import { DeleteUserRequest } from '../../models/user-management.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { User } from '@shared/models/user.model';
-import { DeleteUserDialogData, UserDialogData } from '../../models/user-dialog.model';
+import {
+    DeleteUserDialogData,
+    UserDialogData,
+    UserDialogResult,
+} from '../../models/user-dialog.model';
 import { DeleteUserDialogComponent } from '../delete-user-dialog/delete-user-dialog.component';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,53 +31,115 @@ import { UserInitialsPipe } from '../../pipes/user-initials.pipe';
 
 @Component({
     selector: 'app-user-list',
-    imports: [MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatMenuModule,
-        MatPaginatorModule, MatProgressBarModule, MatSortModule, MatTableModule, UserInitialsPipe],
-    providers: [{ provide: MatPaginatorIntl, useClass: UsersPaginatorIntl }],
+    imports: [
+        MatButtonModule,
+        MatCardModule,
+        MatChipsModule,
+        MatIconModule,
+        MatMenuModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
+        MatSortModule,
+        MatTableModule,
+        UserInitialsPipe,
+    ],
+    providers: [
+        UserFormService,
+        DeleteUserService,
+        { provide: MatPaginatorIntl, useClass: UsersPaginatorIntl },
+    ],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.scss',
 })
 export class UserListComponent {
     readonly state = inject(UsersStateService);
     readonly details = inject(UserActionsService);
+    readonly mutation = inject(UserFormService);
+    readonly deletion = inject(DeleteUserService);
+    readonly busy = computed(() => this.mutation.saving() || this.deletion.deleting());
     private readonly _dialog = inject(MatDialog);
     private readonly _toast = inject(ToastService);
     private readonly _auth = inject(AuthService);
     private readonly _destroyRef = inject(DestroyRef);
     readonly columns = ['name', 'email', 'roles', 'actions'];
 
-    create(): void { this._openDialog({ mode: 'create' }); }
+    create(): void {
+        if (!this.busy()) this._openDialog({ mode: 'create' });
+    }
 
     open(user: User, mode: 'edit' | 'details'): void {
-        this.details.loadUser(user.id).pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-            next: (freshUser) => this._openDialog({ mode, user: freshUser }),
-            error: () => {},
-        });
+        if (this.busy()) return;
+        this.details
+            .loadUser(user.id)
+            .pipe(takeUntilDestroyed(this._destroyRef))
+            .subscribe({
+                next: (freshUser) => this._openDialog({ mode, user: freshUser }),
+                error: () => {},
+            });
     }
 
     remove(user: User): void {
+        if (this.busy()) return;
         const isCurrentUser = user.id === this._auth.currentUser()?.id;
-        this._dialog.open<DeleteUserDialogComponent, DeleteUserDialogData, boolean>(DeleteUserDialogComponent, {
-            data: { user, isCurrentUser }, width: '440px', maxWidth: 'calc(100vw - 32px)',
-        }).afterClosed().pipe(takeUntilDestroyed(this._destroyRef)).subscribe((deleted) => {
-            if (!deleted) return;
-            this._toast.info('Usuário excluído.');
-            if (isCurrentUser) this._auth.logout();
-            else this.state.reload();
-        });
+        this._dialog
+            .open<DeleteUserDialogComponent, DeleteUserDialogData, DeleteUserRequest>(
+                DeleteUserDialogComponent,
+                {
+                    data: { user, isCurrentUser },
+                    width: '440px',
+                    maxWidth: 'calc(100vw - 32px)',
+                },
+            )
+            .afterClosed()
+            .pipe(
+                switchMap((dto) => (dto?.id === user.id ? this.deletion.delete(user.id) : EMPTY)),
+                takeUntilDestroyed(this._destroyRef),
+            )
+            .subscribe({
+                next: () => {
+                    this._toast.info('Usuário excluído.');
+                    if (isCurrentUser) this._auth.logout();
+                    else this.state.reload();
+                },
+                error: () => {},
+            });
     }
 
     private _openDialog(data: UserDialogData): void {
-        this._dialog.open<UserDialogComponent, UserDialogData, User>(UserDialogComponent, {
-            data, width: '520px', maxWidth: 'calc(100vw - 32px)',
-            autoFocus: data.mode === 'details' ? 'dialog' : 'first-tabbable',
-        }).afterClosed().pipe(takeUntilDestroyed(this._destroyRef)).subscribe((saved) => {
-            if (!saved) return;
-            this._toast.info(data.mode === 'create' ? 'Usuário criado.' : 'Usuário atualizado.');
-            if (saved.id === this._auth.currentUser()?.id) {
-                this._auth.fetchCurrentUser().pipe(takeUntilDestroyed(this._destroyRef)).subscribe();
-            }
-            this.state.reload();
-        });
+        this._dialog
+            .open<UserDialogComponent, UserDialogData, UserDialogResult>(UserDialogComponent, {
+                data,
+                width: '520px',
+                maxWidth: 'calc(100vw - 32px)',
+                autoFocus: data.mode === 'details' ? 'dialog' : 'first-tabbable',
+            })
+            .afterClosed()
+            .pipe(
+                switchMap((dto) => {
+                    if (!dto) return EMPTY;
+                    const { name, email, password, roles } = dto;
+                    if (data.mode === 'create')
+                        return this.mutation.create({ name, email, password });
+                    if (data.mode === 'edit')
+                        return this.mutation.update(data.user.id, { name, email, roles });
+                    return EMPTY;
+                }),
+                takeUntilDestroyed(this._destroyRef),
+            )
+            .subscribe({
+                next: (saved) => {
+                    this._toast.info(
+                        data.mode === 'create' ? 'Usuário criado.' : 'Usuário atualizado.',
+                    );
+                    if (saved.id === this._auth.currentUser()?.id) {
+                        this._auth
+                            .fetchCurrentUser()
+                            .pipe(takeUntilDestroyed(this._destroyRef))
+                            .subscribe();
+                    }
+                    this.state.reload();
+                },
+                error: () => {},
+            });
     }
 }
