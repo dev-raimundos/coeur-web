@@ -15,6 +15,18 @@ module.exports = defineConfig([
         ],
         processor: angular.processInlineTemplates,
         rules: {
+            '@typescript-eslint/explicit-member-accessibility': [
+                'error',
+                {
+                    accessibility: 'off',
+                    overrides: {
+                        methods: 'explicit',
+                        accessors: 'explicit',
+                        properties: 'explicit',
+                        parameterProperties: 'explicit',
+                    },
+                },
+            ],
             '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
             '@angular-eslint/directive-selector': [
                 'error',

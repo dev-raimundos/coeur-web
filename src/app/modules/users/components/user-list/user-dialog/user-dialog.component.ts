@@ -29,13 +29,13 @@ const DIALOG_TITLES = {
 export class UserDialogComponent {
     private readonly _data = inject<UserDialogData>(MAT_DIALOG_DATA);
     private readonly _fb = inject(FormBuilder);
-    readonly hidePassword = signal(true);
-    readonly isCreate = this._data.mode === 'create';
-    readonly isDetails = this._data.mode === 'details';
-    readonly user = this._data.mode === 'create' ? undefined : this._data.user;
-    readonly title = DIALOG_TITLES[this._data.mode];
-    readonly submitLabel = this.isCreate ? 'Criar usuário' : 'Salvar alterações';
-    readonly form = this._fb.nonNullable.group({
+    public readonly hidePassword = signal(true);
+    public readonly isCreate = this._data.mode === 'create';
+    public readonly isDetails = this._data.mode === 'details';
+    public readonly user = this._data.mode === 'create' ? undefined : this._data.user;
+    public readonly title = DIALOG_TITLES[this._data.mode];
+    public readonly submitLabel = this.isCreate ? 'Criar usuário' : 'Salvar alterações';
+    public readonly form = this._fb.nonNullable.group({
         name: [
             this.user?.name ?? '',
             [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)],
@@ -53,11 +53,11 @@ export class UserDialogComponent {
         roles: [this.user?.roles ?? 'ROLE_USER', [Validators.required, Validators.pattern(/\S/)]],
     });
 
-    togglePasswordVisibility(): void {
+    public togglePasswordVisibility(): void {
         this.hidePassword.update((hidden) => !hidden);
     }
 
-    result(): UserDialogResult | undefined {
+    public result(): UserDialogResult | undefined {
         if (this.form.invalid || this.isDetails) return undefined;
         const { name, email, password, roles } = this.form.getRawValue();
         return { name: name.trim(), email: email.trim(), password, roles: roles.trim() };

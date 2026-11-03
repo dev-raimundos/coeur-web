@@ -79,28 +79,28 @@ export class DashboardComponent {
 
     @ViewChild('confirmDialog') private readonly _confirmDialogTemplate!: TemplateRef<unknown>;
 
-    currentUser = this._authService.currentUser;
-    isLoading = signal(false);
+    public currentUser = this._authService.currentUser;
+    public isLoading = signal(false);
 
-    readonly categoryOptions = ['Geral', 'Bug', 'Melhoria', 'Urgente'];
-    readonly planOptions = ['Básico', 'Pro', 'Enterprise'];
-    readonly tagOptions = ['Frontend', 'Backend', 'Design', 'Mobile', 'API'];
+    public readonly categoryOptions = ['Geral', 'Bug', 'Melhoria', 'Urgente'];
+    public readonly planOptions = ['Básico', 'Pro', 'Enterprise'];
+    public readonly tagOptions = ['Frontend', 'Backend', 'Design', 'Mobile', 'API'];
 
-    readonly displayedColumns = ['name', 'email', 'role', 'status'];
-    readonly userRows: UserRow[] = [
+    public readonly displayedColumns = ['name', 'email', 'role', 'status'];
+    public readonly userRows: UserRow[] = [
         { name: 'Ana Silva', email: 'ana.silva@exemplo.com', role: 'Admin', status: 'Ativo' },
         { name: 'Bruno Costa', email: 'bruno.costa@exemplo.com', role: 'Editor', status: 'Ativo' },
         { name: 'Carla Souza', email: 'carla.souza@exemplo.com', role: 'Leitor', status: 'Inativo' },
         { name: 'Diego Alves', email: 'diego.alves@exemplo.com', role: 'Editor', status: 'Ativo' },
     ];
 
-    readonly activityItems: ActivityItem[] = [
+    public readonly activityItems: ActivityItem[] = [
         { icon: 'person_add', title: 'Novo usuário cadastrado', subtitle: 'há 2 minutos' },
         { icon: 'edit', title: 'Perfil atualizado', subtitle: 'há 1 hora' },
         { icon: 'delete', title: 'Registro removido', subtitle: 'ontem' },
     ];
 
-    form = this._fb.nonNullable.group({
+    public form = this._fb.nonNullable.group({
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         category: ['Bug', Validators.required],
@@ -112,7 +112,7 @@ export class DashboardComponent {
         volume: [50],
     });
 
-    submitForm(): void {
+    public submitForm(): void {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
@@ -122,7 +122,7 @@ export class DashboardComponent {
         this.form.reset({ category: 'Bug', tags: ['Frontend'], plan: 'Pro', notifications: true, volume: 50 });
     }
 
-    simulateLoading(): void {
+    public simulateLoading(): void {
         this.isLoading.set(true);
         setTimeout(() => {
             this.isLoading.set(false);
@@ -130,7 +130,7 @@ export class DashboardComponent {
         }, LOADING_SIMULATION_MS);
     }
 
-    openDialog(): void {
+    public openDialog(): void {
         this._dialog.open(this._confirmDialogTemplate);
     }
 }

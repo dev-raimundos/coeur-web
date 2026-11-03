@@ -6,9 +6,9 @@ import { UserService } from './user.service';
 export class DeleteUserService {
     private readonly _api = inject(UserService);
     private readonly _deleting = signal(false);
-    readonly deleting = this._deleting.asReadonly();
+    public readonly deleting = this._deleting.asReadonly();
 
-    delete(id: string): Observable<void> {
+    public delete(id: string): Observable<void> {
         return defer(() => {
             if (this._deleting()) return EMPTY;
             this._deleting.set(true);

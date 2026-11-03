@@ -18,5 +18,5 @@ export interface ConfirmationDialogData {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmationDialogComponent {
-    readonly data = inject<ConfirmationDialogData>(MAT_DIALOG_DATA);
+    public readonly data = inject<ConfirmationDialogData>(MAT_DIALOG_DATA);
 }

@@ -14,13 +14,13 @@ export class UserService {
     private readonly _page = signal(0);
     private readonly _perPage = signal(10);
     private readonly _sort = signal('name,asc');
-    readonly loading = this._loading.asReadonly();
-    readonly data = this._data.asReadonly();
-    readonly page = this._page.asReadonly();
-    readonly perPage = this._perPage.asReadonly();
-    readonly sort = this._sort.asReadonly();
+    public readonly loading = this._loading.asReadonly();
+    public readonly data = this._data.asReadonly();
+    public readonly page = this._page.asReadonly();
+    public readonly perPage = this._perPage.asReadonly();
+    public readonly sort = this._sort.asReadonly();
 
-    list(page: number, size: number, sort: string): Observable<UserPage> {
+    public list(page: number, size: number, sort: string): Observable<UserPage> {
         const params = new HttpParams()
             .set('page', page)
             .set('size', size)
@@ -41,19 +41,19 @@ export class UserService {
         );
     }
 
-    get(id: string) {
+    public get(id: string) {
         return this._http.get<User>(`${this._url}/${encodeURIComponent(id)}`);
     }
 
-    create(request: RegisterUserRequest) {
+    public create(request: RegisterUserRequest) {
         return this._http.post<User>(`${this._url}/register`, request);
     }
 
-    update(id: string, request: UpdateUserRequest) {
+    public update(id: string, request: UpdateUserRequest) {
         return this._http.put<User>(`${this._url}/${encodeURIComponent(id)}`, request);
     }
 
-    delete(id: string) {
+    public delete(id: string) {
         return this._http.delete<void>(`${this._url}/${encodeURIComponent(id)}`);
     }
 }

@@ -28,19 +28,19 @@ export class LoginComponent {
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
 
-    isLoading = this._authService.isLoginLoading;
-    hidePassword = signal(true);
+    public isLoading = this._authService.isLoginLoading;
+    public hidePassword = signal(true);
 
-    form = this._fb.nonNullable.group({
+    public form = this._fb.nonNullable.group({
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required]],
     });
 
-    togglePasswordVisibility(): void {
+    public togglePasswordVisibility(): void {
         this.hidePassword.set(!this.hidePassword());
     }
 
-    submit(): void {
+    public submit(): void {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;

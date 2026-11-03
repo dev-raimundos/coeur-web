@@ -8,13 +8,13 @@ import { UserService } from './user.service';
 export class UserFormService {
     private readonly _api = inject(UserService);
     private readonly _saving = signal(false);
-    readonly saving = this._saving.asReadonly();
+    public readonly saving = this._saving.asReadonly();
 
-    create(request: RegisterUserRequest): Observable<User> {
+    public create(request: RegisterUserRequest): Observable<User> {
         return this._save(() => this._api.create(request));
     }
 
-    update(id: string, request: UpdateUserRequest): Observable<User> {
+    public update(id: string, request: UpdateUserRequest): Observable<User> {
         return this._save(() => this._api.update(id, request));
     }
 

@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
     styleUrl: './internal-error.component.scss',
 })
 export class InternalErrorComponent {
-    reload(): void {
+    public reload(): void {
         window.location.reload();
     }
 }

@@ -46,28 +46,28 @@ import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
     styleUrl: './user-list.component.scss',
 })
 export class UserListComponent implements OnInit {
-    readonly api = inject(UserService);
-    readonly details = inject(UserActionsService);
-    readonly mutation = inject(UserFormService);
-    readonly deletion = inject(DeleteUserService);
-    readonly busy = computed(() => this.mutation.saving() || this.deletion.deleting());
+    public readonly api = inject(UserService);
+    public readonly details = inject(UserActionsService);
+    public readonly mutation = inject(UserFormService);
+    public readonly deletion = inject(DeleteUserService);
+    public readonly busy = computed(() => this.mutation.saving() || this.deletion.deleting());
     private readonly _dialog = inject(MatDialog);
     private readonly _toast = inject(ToastService);
     private readonly _auth = inject(AuthService);
     private readonly _destroyRef = inject(DestroyRef);
-    readonly columns = ['name', 'email', 'roles', 'actions'];
+    public readonly columns = ['name', 'email', 'roles', 'actions'];
 
     private _listRequest?: Subscription;
 
-    refresh(): void {
+    public refresh(): void {
         this._load(this.api.page(), this.api.perPage(), this.api.sort());
     }
 
-    handlePageEvent(event: PageEvent): void {
+    public handlePageEvent(event: PageEvent): void {
         this._load(event.pageIndex, event.pageSize, this.api.sort());
     }
 
-    changeSort(sort: Sort): void {
+    public changeSort(sort: Sort): void {
         const value = sort.direction ? sort.active + ',' + sort.direction : 'name,asc';
         this._load(0, this.api.perPage(), value);
     }
@@ -80,15 +80,15 @@ export class UserListComponent implements OnInit {
             .subscribe({ error: () => {} });
     }
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
         this.refresh();
     }
 
-    create(): void {
+    public create(): void {
         if (!this.busy()) this._openDialog({ mode: 'create' });
     }
 
-    open(user: User, mode: 'edit' | 'details'): void {
+    public open(user: User, mode: 'edit' | 'details'): void {
         if (this.busy()) return;
         this.details
             .loadUser(user.id)
@@ -99,7 +99,7 @@ export class UserListComponent implements OnInit {
             });
     }
 
-    remove(user: User): void {
+    public remove(user: User): void {
 
         if (this.busy()) {
             return;

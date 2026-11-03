@@ -41,30 +41,30 @@ export class ShellComponent {
     private readonly _themeService = inject(ThemeService);
     private readonly _breakpointObserver = inject(BreakpointObserver);
 
-    opened = signal(!this._breakpointObserver.isMatched(Breakpoints.Handset));
-    currentUser = this._authService.currentUser;
-    theme = this._themeService.theme;
+    public opened = signal(!this._breakpointObserver.isMatched(Breakpoints.Handset));
+    public currentUser = this._authService.currentUser;
+    public theme = this._themeService.theme;
 
-    userDisplayName = computed(() => this._firstAndLastNameOf(this.currentUser()?.name));
+    public userDisplayName = computed(() => this._firstAndLastNameOf(this.currentUser()?.name));
 
-    isMobile = toSignal(
+    public isMobile = toSignal(
         this._breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
         { initialValue: false },
     );
 
-    toggleSidenav() {
+    public toggleSidenav() {
         this.opened.set(!this.opened());
     }
 
-    setTheme(theme: Theme) {
+    public setTheme(theme: Theme) {
         this._themeService.setTheme(theme);
     }
 
-    logout() {
+    public logout() {
         this._authService.logout();
     }
 
-    menuItems = [
+    public menuItems = [
         { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
         { label: 'Usuários', icon: 'people', route: '/usuarios' },
         { label: 'Configurações', icon: 'settings', route: '/config' },
