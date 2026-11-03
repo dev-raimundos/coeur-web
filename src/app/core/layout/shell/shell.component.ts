@@ -1,6 +1,6 @@
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { PaginatorIntlService } from '@shared/services/paginator-intl.service';
-import { Component, computed, inject, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -65,7 +65,7 @@ export class ShellComponent {
     }
 
     public menuItems = [
-        { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+        { label: 'Painel', icon: 'dashboard', route: '/dashboard' },
         { label: 'Usuários', icon: 'people', route: '/usuarios' },
         { label: 'Configurações', icon: 'settings', route: '/config' },
     ];

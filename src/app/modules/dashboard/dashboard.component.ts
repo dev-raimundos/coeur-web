@@ -6,7 +6,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerIntl, MatDatepickerModule } from '@angular/material/datepicker';
+import { DatepickerIntlService } from '@shared/services/datepicker-intl.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -67,7 +68,10 @@ const LOADING_SIMULATION_MS = 1800;
         MatTooltipModule,
         MatDialogModule,
     ],
-    providers: [provideNativeDateAdapter()],
+    providers: [
+        provideNativeDateAdapter(),
+        { provide: MatDatepickerIntl, useClass: DatepickerIntlService },
+    ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss',
 })
@@ -82,15 +86,31 @@ export class DashboardComponent {
     public currentUser = this._authService.currentUser;
     public isLoading = signal(false);
 
-    public readonly categoryOptions = ['Geral', 'Bug', 'Melhoria', 'Urgente'];
-    public readonly planOptions = ['Básico', 'Pro', 'Enterprise'];
-    public readonly tagOptions = ['Frontend', 'Backend', 'Design', 'Mobile', 'API'];
+    public readonly categoryOptions = ['Geral', 'Erro', 'Melhoria', 'Urgente'];
+    public readonly planOptions = ['Básico', 'Profissional', 'Empresarial'];
+    public readonly tagOptions = [
+        'Interface',
+        'Servidor',
+        'Aparência',
+        'Dispositivos móveis',
+        'Integração',
+    ];
 
     public readonly displayedColumns = ['name', 'email', 'role', 'status'];
     public readonly userRows: UserRow[] = [
-        { name: 'Ana Silva', email: 'ana.silva@exemplo.com', role: 'Admin', status: 'Ativo' },
+        {
+            name: 'Ana Silva',
+            email: 'ana.silva@exemplo.com',
+            role: 'Administrador',
+            status: 'Ativo',
+        },
         { name: 'Bruno Costa', email: 'bruno.costa@exemplo.com', role: 'Editor', status: 'Ativo' },
-        { name: 'Carla Souza', email: 'carla.souza@exemplo.com', role: 'Leitor', status: 'Inativo' },
+        {
+            name: 'Carla Souza',
+            email: 'carla.souza@exemplo.com',
+            role: 'Leitor',
+            status: 'Inativo',
+        },
         { name: 'Diego Alves', email: 'diego.alves@exemplo.com', role: 'Editor', status: 'Ativo' },
     ];
 
@@ -103,10 +123,10 @@ export class DashboardComponent {
     public form = this._fb.nonNullable.group({
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        category: ['Bug', Validators.required],
+        category: ['Erro', Validators.required],
         date: [null as Date | null],
-        tags: [['Frontend'] as string[]],
-        plan: ['Pro'],
+        tags: [['Interface'] as string[]],
+        plan: ['Profissional'],
         agree: [false, Validators.requiredTrue],
         notifications: [true],
         volume: [50],
@@ -119,7 +139,13 @@ export class DashboardComponent {
         }
 
         this._toast.info(`Formulário enviado para ${this.form.getRawValue().name}.`);
-        this.form.reset({ category: 'Bug', tags: ['Frontend'], plan: 'Pro', notifications: true, volume: 50 });
+        this.form.reset({
+            category: 'Erro',
+            tags: ['Interface'],
+            plan: 'Profissional',
+            notifications: true,
+            volume: 50,
+        });
     }
 
     public simulateLoading(): void {

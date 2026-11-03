@@ -1,5 +1,5 @@
 <header class="dashboard-header">
-    <h1>Dashboard</h1>
+    <h1>Painel</h1>
     @if (currentUser(); as user) {
         <p>Bem-vindo(a), {{ user.name }}.</p>
     }
@@ -12,20 +12,21 @@
             <mat-card-subtitle>Ações, ícones e destaque</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="button-row">
-            <button mat-flat-button>Flat</button>
-            <button mat-raised-button color="primary">Raised</button>
-            <button mat-stroked-button>Stroked</button>
-            <button mat-button>Text</button>
+            <button mat-flat-button>Preenchido</button>
+            <button mat-raised-button color="primary">Com elevação</button>
+            <button mat-stroked-button>Contornado</button>
+            <button mat-button>Texto</button>
             <button
                 mat-icon-button
                 matTooltip="Notificações"
+                aria-label="Notificações"
                 matBadge="3"
                 matBadgeSize="small"
                 matBadgeColor="warn"
             >
                 <mat-icon>notifications</mat-icon>
             </button>
-            <button mat-fab color="primary" matTooltip="Adicionar">
+            <button mat-fab color="primary" matTooltip="Adicionar" aria-label="Adicionar">
                 <mat-icon>add</mat-icon>
             </button>
         </mat-card-content>
@@ -71,8 +72,8 @@
                 </mat-form-field>
 
                 <div class="demo-form__field">
-                    <span class="demo-form__label">Tags</span>
-                    <mat-chip-listbox formControlName="tags" multiple>
+                    <span class="demo-form__label">Marcadores</span>
+                    <mat-chip-listbox formControlName="tags" multiple aria-label="Marcadores">
                         @for (tag of tagOptions; track tag) {
                             <mat-chip-option [value]="tag">{{ tag }}</mat-chip-option>
                         }
@@ -81,7 +82,11 @@
 
                 <div class="demo-form__field">
                     <span class="demo-form__label">Plano</span>
-                    <mat-radio-group formControlName="plan" class="demo-form__radio-group">
+                    <mat-radio-group
+                        formControlName="plan"
+                        class="demo-form__radio-group"
+                        aria-label="Plano"
+                    >
                         @for (option of planOptions; track option) {
                             <mat-radio-button [value]="option">{{ option }}</mat-radio-button>
                         }
@@ -91,7 +96,11 @@
                 <div class="demo-form__field">
                     <span class="demo-form__label">Volume de alerta</span>
                     <mat-slider min="0" max="100" step="10" discrete>
-                        <input matSliderThumb formControlName="volume" />
+                        <input
+                            matSliderThumb
+                            formControlName="volume"
+                            aria-label="Volume de alerta"
+                        />
                     </mat-slider>
                 </div>
 
@@ -110,11 +119,12 @@
 
     <mat-card class="demo-card">
         <mat-card-header>
-            <mat-card-title>Feedback</mat-card-title>
-            <mat-card-subtitle>Progresso, snackbar e diálogo</mat-card-subtitle>
+            <mat-card-title>Retorno das ações</mat-card-title>
+            <mat-card-subtitle>Progresso, notificações e diálogo</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="feedback-content">
             <mat-progress-bar
+                aria-label="Progresso da operação"
                 [mode]="isLoading() ? 'indeterminate' : 'determinate'"
                 [value]="70"
             ></mat-progress-bar>
@@ -124,6 +134,7 @@
                     @if (isLoading()) {
                         <mat-progress-spinner
                             diameter="20"
+                            aria-label="Carregando"
                             mode="indeterminate"
                         ></mat-progress-spinner>
                     } @else {
@@ -140,7 +151,7 @@
             <mat-card-title>Abas</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-            <mat-tab-group>
+            <mat-tab-group aria-label="Informações do painel">
                 <mat-tab label="Visão geral">
                     <p class="tab-content">Resumo das atividades recentes do sistema.</p>
                 </mat-tab>
@@ -177,7 +188,7 @@
         </mat-card-header>
         <mat-card-content>
             <div class="table-scroll">
-                <table mat-table [dataSource]="userRows">
+                <table mat-table [dataSource]="userRows" aria-label="Usuários de exemplo">
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef>Nome</th>
                         <td mat-cell *matCellDef="let row">{{ row.name }}</td>
@@ -194,7 +205,7 @@
                     </ng-container>
 
                     <ng-container matColumnDef="status">
-                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <th mat-header-cell *matHeaderCellDef>Situação</th>
                         <td mat-cell *matCellDef="let row">{{ row.status }}</td>
                     </ng-container>
 
@@ -213,7 +224,7 @@
             <mat-accordion>
                 <mat-expansion-panel>
                     <mat-expansion-panel-header>
-                        <mat-panel-title>Como funciona o dashboard?</mat-panel-title>
+                        <mat-panel-title>Como funciona o painel?</mat-panel-title>
                     </mat-expansion-panel-header>
                     <p>Ele reúne indicadores e ações rápidas em um só lugar.</p>
                 </mat-expansion-panel>
@@ -230,9 +241,7 @@
 
 <ng-template #confirmDialog>
     <h2 mat-dialog-title>Confirmar ação</h2>
-    <mat-dialog-content
-        >Esta é uma demonstração do componente Dialog do Angular Material.</mat-dialog-content
-    >
+    <mat-dialog-content>Esta é uma demonstração do componente de diálogo.</mat-dialog-content>
     <mat-dialog-actions align="end">
         <button mat-button mat-dialog-close>Cancelar</button>
         <button mat-flat-button color="primary" mat-dialog-close>Confirmar</button>

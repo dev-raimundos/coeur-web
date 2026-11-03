@@ -89,7 +89,7 @@
                         <th mat-header-cell scope="col" *matHeaderCellDef>Permissões</th>
                         <td mat-cell *matCellDef="let user">
                             <mat-chip-set aria-label="Permissões"
-                                ><mat-chip>{{ user.roles }}</mat-chip></mat-chip-set
+                                ><mat-chip>{{ user.roles | userRoleLabel }}</mat-chip></mat-chip-set
                             >
                         </td>
                     </ng-container>

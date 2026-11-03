@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import { DashboardComponent } from './dashboard.component';
+import { provideBrazilianPortuguese } from '@core/i18n/locale.providers';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { User } from '@shared/models/user.model';
@@ -19,6 +20,7 @@ describe('DashboardComponent', () => {
         await TestBed.configureTestingModule({
             imports: [DashboardComponent],
             providers: [
+                provideBrazilianPortuguese(),
                 { provide: AuthService, useValue: { currentUser } },
                 { provide: ToastService, useValue: { info: toastInfoSpy } },
             ],
@@ -59,8 +61,8 @@ describe('DashboardComponent', () => {
             email: 'carla@example.com',
             category: 'Urgente',
             date: null,
-            tags: ['Backend'],
-            plan: 'Enterprise',
+            tags: ['Servidor'],
+            plan: 'Empresarial',
             agree: true,
             notifications: false,
             volume: 80,
@@ -70,7 +72,7 @@ describe('DashboardComponent', () => {
 
         expect(toastInfoSpy).toHaveBeenCalledWith('Formulário enviado para Carla Souza.');
         expect(component.form.getRawValue().name).toBe('');
-        expect(component.form.getRawValue().plan).toBe('Pro');
+        expect(component.form.getRawValue().plan).toBe('Profissional');
     });
 
     it('should toggle isLoading and notify once the simulated loading finishes', () => {
@@ -95,5 +97,17 @@ describe('DashboardComponent', () => {
 
         const compiled = document.body;
         expect(compiled.textContent).toContain('Confirmar ação');
+    });
+
+    it('opens the calendar with Portuguese navigation labels', async () => {
+        const toggle: HTMLButtonElement = fixture.nativeElement.querySelector(
+            'mat-datepicker-toggle button',
+        );
+        expect(toggle.getAttribute('aria-label')).toBe('Abrir calendário');
+        toggle.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(document.body.querySelector('button[aria-label="Próximo mês"]')).not.toBeNull();
+        expect(document.body.querySelector('button[aria-label="Mês anterior"]')).not.toBeNull();
     });
 });

@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 
+import { provideBrazilianPortuguese } from '@core/i18n/locale.providers';
 import { ShellComponent } from './shell.component';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { Theme, ThemeService } from '@core/services/theme/theme.service';
@@ -27,6 +28,7 @@ describe('ShellComponent', () => {
             imports: [ShellComponent],
             providers: [
                 provideRouter([]),
+                provideBrazilianPortuguese(),
                 {
                     provide: AuthService,
                     useValue: { currentUser, logout: logoutSpy },

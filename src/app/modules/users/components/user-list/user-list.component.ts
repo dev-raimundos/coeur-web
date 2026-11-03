@@ -23,6 +23,7 @@ import { MatTableModule } from '@angular/material/table';
 import { UserService } from '../../services/user.service';
 import { isValidDto } from '@shared/utils/type-guard';
 import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
+import { UserRoleLabelPipe } from '@shared/pipes/user-role-label.pipe';
 
 @Component({
     selector: 'app-user-list',
@@ -37,6 +38,7 @@ import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
         MatSortModule,
         MatTableModule,
         UserInitialsPipe,
+        UserRoleLabelPipe,
     ],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.scss',

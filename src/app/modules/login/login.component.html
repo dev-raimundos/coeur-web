@@ -51,7 +51,7 @@
                 [disabled]="isLoading()"
             >
                 @if (isLoading()) {
-                    <mat-spinner diameter="20"></mat-spinner>
+                    <mat-spinner diameter="20" aria-label="Entrando"></mat-spinner>
                 } @else {
                     <ng-container>
                         <mat-icon>login</mat-icon>

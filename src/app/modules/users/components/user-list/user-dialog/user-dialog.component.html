@@ -66,13 +66,26 @@
                     <mat-error>Informe uma senha com até 100 caracteres.</mat-error>
                 }
             </mat-form-field>
-            <p class="description">A nova conta receberá a permissão padrão ROLE_USER.</p>
+            <p class="description">A nova conta receberá a permissão padrão de usuário.</p>
         } @else {
             <mat-form-field appearance="outline">
                 <mat-label>Permissões</mat-label>
-                <input matInput formControlName="roles" [readonly]="isDetails" />
+                @if (isDetails) {
+                    <input matInput [value]="user?.roles | userRoleLabel" readonly />
+                } @else {
+                    <mat-select formControlName="roles">
+                        @for (option of roleOptions; track option.value) {
+                            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                        }
+                        @if (hasCustomRole) {
+                            <mat-option [value]="user?.roles">{{
+                                user?.roles | userRoleLabel
+                            }}</mat-option>
+                        }
+                    </mat-select>
+                }
                 @if (!isDetails) {
-                    <mat-hint>Exemplo: ROLE_USER</mat-hint>
+                    <mat-hint>Selecione a permissão de acesso.</mat-hint>
                 }
                 @if (form.controls.roles.invalid) {
                     <mat-error>Informe as permissões da conta.</mat-error>

@@ -58,4 +58,22 @@ describe('UserDialogComponent', () => {
     it('does not return a mutation DTO from the details view', () => {
         expect(setup({ mode: 'details', user }).componentInstance.result()).toBeUndefined();
     });
+
+    it('displays translated permission labels while keeping API values in the DTO', () => {
+        const fixture = setup({ mode: 'edit', user });
+        fixture.componentInstance.form.controls.roles.setValue('ROLE_ADMIN');
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain('Administrador');
+        expect(fixture.componentInstance.result()).toEqual(
+            new UpdateUserDTO(user.name, user.email, 'ROLE_ADMIN'),
+        );
+    });
+
+    it('preserves custom permissions when editing existing accounts', () => {
+        const fixture = setup({ mode: 'edit', user: { ...user, roles: 'CUSTOM_ROLE' } });
+        expect(fixture.componentInstance.form.controls.roles.value).toBe('CUSTOM_ROLE');
+        expect(fixture.componentInstance.result()).toEqual(
+            new UpdateUserDTO(user.name, user.email, 'CUSTOM_ROLE'),
+        );
+    });
 });
