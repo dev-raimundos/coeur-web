@@ -16,11 +16,11 @@
     >
         <div class="list-toolbar">
             <h2>
-                Contas cadastradas <span class="count">{{ page().totalElements }}</span>
+                Contas cadastradas <span class="count">{{ api.data().totalElements }}</span>
             </h2>
             <button
                 mat-icon-button
-                (click)="reload()"
+                (click)="refresh()"
                 [disabled]="api.loading()"
                 aria-label="Atualizar lista de usuários"
             >
@@ -33,7 +33,7 @@
             }
         </div>
 
-        @if (!api.loading() && page().content.length === 0) {
+        @if (!api.loading() && api.data().content.length === 0) {
             <div class="empty-state">
                 <mat-icon>group</mat-icon>
                 <h3>Nenhum usuário para exibir</h3>
@@ -47,10 +47,10 @@
                 <table
                     mat-table
                     aria-label="Usuários cadastrados"
-                    [dataSource]="page().content"
+                    [dataSource]="api.data().content"
                     matSort
-                    [matSortActive]="sort().active"
-                    [matSortDirection]="sort().direction"
+                    [matSortActive]="api.sort().split(',')[0]"
+                    [matSortDirection]="api.sort().endsWith(',desc') ? 'desc' : 'asc'"
                     matSortDisableClear
                     (matSortChange)="changeSort($event)"
                 >
@@ -125,13 +125,13 @@
             </div>
         }
         <mat-paginator
-            [length]="page().totalElements"
-            [pageIndex]="pageIndex()"
-            [pageSize]="pageSize()"
+            [length]="api.data().totalElements"
+            [pageIndex]="api.page()"
+            [pageSize]="api.perPage()"
             [pageSizeOptions]="[10, 20, 50]"
             [disabled]="api.loading()"
             showFirstLastButtons
-            (page)="changePage($event)"
+            (page)="handlePageEvent($event)"
             aria-label="Paginação de usuários"
         />
     </mat-card>

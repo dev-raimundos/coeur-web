@@ -1,9 +1,8 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subscription, switchMap } from 'rxjs';
+import { EMPTY, filter, Subscription, switchMap } from 'rxjs';
 import { UserFormService } from '../../services/user-form.service';
 import { DeleteUserService } from '../../services/delete-user.service';
-import { UserPage } from '../../models/user-management.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
@@ -25,6 +24,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { UserActionsService } from '../../services/user-actions.service';
 import { UserService } from '../../services/user.service';
+import { isValidDto } from '@shared/utils/type-guard';
 import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
 
 @Component({
@@ -57,48 +57,31 @@ export class UserListComponent implements OnInit {
     private readonly _destroyRef = inject(DestroyRef);
     readonly columns = ['name', 'email', 'roles', 'actions'];
 
-    readonly page = signal<UserPage>({ content: [], totalElements: 0 });
-    readonly pageIndex = signal(0);
-    readonly pageSize = signal(10);
-    readonly sort = signal<Sort>({ active: 'name', direction: 'asc' });
     private _listRequest?: Subscription;
 
-    reload(): void {
-        this._listRequest?.unsubscribe();
-        const { active, direction } = this.sort();
-        this._listRequest = this.api
-            .list(this.pageIndex(), this.pageSize(), `${active},${direction}`)
-            .pipe(takeUntilDestroyed(this._destroyRef))
-            .subscribe({
-                next: (page) => {
-                    this.page.set(page);
-                    const lastPage = Math.max(
-                        0,
-                        Math.ceil(page.totalElements / this.pageSize()) - 1,
-                    );
-                    if (this.pageIndex() > lastPage) {
-                        this.pageIndex.set(lastPage);
-                        this.reload();
-                    }
-                },
-                error: () => {},
-            });
+    refresh(): void {
+        this._load(this.api.page(), this.api.perPage(), this.api.sort());
     }
 
-    changePage(event: PageEvent): void {
-        this.pageIndex.set(event.pageIndex);
-        this.pageSize.set(event.pageSize);
-        this.reload();
+    handlePageEvent(event: PageEvent): void {
+        this._load(event.pageIndex, event.pageSize, this.api.sort());
     }
 
     changeSort(sort: Sort): void {
-        this.sort.set(sort.direction ? sort : { active: 'name', direction: 'asc' });
-        this.pageIndex.set(0);
-        this.reload();
+        const value = sort.direction ? sort.active + ',' + sort.direction : 'name,asc';
+        this._load(0, this.api.perPage(), value);
+    }
+
+    private _load(page: number, perPage: number, sort: string): void {
+        this._listRequest?.unsubscribe();
+        this._listRequest = this.api
+            .list(page, perPage, sort)
+            .pipe(takeUntilDestroyed(this._destroyRef))
+            .subscribe({ error: () => {} });
     }
 
     ngOnInit(): void {
-        this.reload();
+        this.refresh();
     }
 
     create(): void {
@@ -117,7 +100,10 @@ export class UserListComponent implements OnInit {
     }
 
     remove(user: User): void {
-        if (this.busy()) return;
+
+        if (this.busy()) {
+            return;
+        }
         const isCurrentUser = user.id === this._auth.currentUser()?.id;
         this._dialog
             .open<ConfirmationDialogComponent, ConfirmationDialogData, boolean>(
@@ -134,16 +120,15 @@ export class UserListComponent implements OnInit {
             )
             .afterClosed()
             .pipe(
-                switchMap((confirmed) =>
-                    confirmed === true ? this.deletion.delete(user.id) : EMPTY,
-                ),
+                filter(isValidDto<boolean>),
+                switchMap(() => this.deletion.delete(user.id)),
                 takeUntilDestroyed(this._destroyRef),
             )
             .subscribe({
                 next: () => {
                     this._toast.info('Usuário excluído.');
                     if (isCurrentUser) this._auth.logout();
-                    else this.reload();
+                    else this.refresh();
                 },
                 error: () => {},
             });
@@ -159,8 +144,8 @@ export class UserListComponent implements OnInit {
             })
             .afterClosed()
             .pipe(
+                filter(isValidDto<UserDialogResult>),
                 switchMap((dto) => {
-                    if (!dto) return EMPTY;
                     const { name, email, password, roles } = dto;
                     if (data.mode === 'create')
                         return this.mutation.create({ name, email, password });
@@ -181,7 +166,7 @@ export class UserListComponent implements OnInit {
                             .pipe(takeUntilDestroyed(this._destroyRef))
                             .subscribe();
                     }
-                    this.reload();
+                    this.refresh();
                 },
                 error: () => {},
             });

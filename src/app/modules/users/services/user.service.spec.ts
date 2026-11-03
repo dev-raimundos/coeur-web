@@ -22,7 +22,37 @@ describe('UserService', () => {
         expect(request.request.params.get('page')).toBe('2');
         expect(request.request.params.get('size')).toBe('20');
         expect(request.request.params.get('sort')).toBe('email,desc');
-        request.flush({ content: [], totalElements: 0 });
+        request.flush({ content: [], totalElements: 100 });
+    });
+
+    it('stores list data and reuses pagination and sorting on refresh', () => {
+        const response = { content: [], totalElements: 100 };
+        service.list(2, 20, 'email,desc').subscribe();
+        http.expectOne((req) => req.url === '/api/v1/users').flush(response);
+        expect(service.data()).toEqual(response);
+        expect(service.page()).toBe(2);
+        expect(service.perPage()).toBe(20);
+        expect(service.sort()).toBe('email,desc');
+        service.list(service.page(), service.perPage(), service.sort()).subscribe();
+        const request = http.expectOne((req) => req.url === '/api/v1/users');
+        expect(request.request.params.get('page')).toBe('2');
+        expect(request.request.params.get('size')).toBe('20');
+        expect(request.request.params.get('sort')).toBe('email,desc');
+        request.flush(response);
+    });
+
+    it('loads the last available page when deletion makes the current page invalid', () => {
+        service.list(2, 10, 'name,asc').subscribe();
+        http.expectOne((req) => req.params.get('page') === '2').flush({
+            content: [],
+            totalElements: 20,
+        });
+        expect(service.loading()).toBe(true);
+        expect(service.page()).toBe(1);
+        const response = { content: [], totalElements: 20 };
+        http.expectOne((req) => req.params.get('page') === '1').flush(response);
+        expect(service.data()).toEqual(response);
+        expect(service.loading()).toBe(false);
     });
 
     it('uses the available CRUD endpoints and payloads', () => {

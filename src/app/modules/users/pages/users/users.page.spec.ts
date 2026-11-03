@@ -58,12 +58,12 @@ describe('UsersPage', () => {
             .componentInstance as UserListComponent;
         const secondState = second.debugElement.query(By.directive(UserListComponent))
             .componentInstance as UserListComponent;
-        firstState.changePage({ pageIndex: 2, pageSize: 20, length: 100 });
-        expect(firstState.pageIndex()).toBe(2);
+        firstState.handlePageEvent({ pageIndex: 2, pageSize: 20, length: 100 });
+        expect(firstState.api.page()).toBe(2);
         http.expectOne((req) => req.url === '/api/v1/users').flush({
             content: [],
-            totalElements: 0,
+            totalElements: 100,
         });
-        expect(secondState.pageIndex()).toBe(0);
+        expect(secondState.api.page()).toBe(0);
     });
 });

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
-import { of, Subject, throwError } from 'rxjs';
+import { finalize as finalizeRequest, of, Subject, throwError } from 'rxjs';
 import { User } from '@shared/models/user.model';
 import { UserListComponent } from './user-list.component';
 import { UserActionsService } from '../../services/user-actions.service';
@@ -12,6 +12,9 @@ import { UserService } from '../../services/user.service';
 describe('UserListComponent', () => {
     const user: User = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
     const api = {
+        page: signal(0),
+        perPage: signal(10),
+        sort: signal('name,asc'),
         list: vi.fn(),
         get: vi.fn(),
         create: vi.fn(),
@@ -28,6 +31,9 @@ describe('UserListComponent', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        api.page.set(0);
+        api.perPage.set(10);
+        api.sort.set('name,asc');
         api.get.mockReturnValue(of(user));
         api.list.mockReturnValue(of({ content: [user], totalElements: 1 }));
         api.create.mockReturnValue(of(user));
@@ -47,6 +53,30 @@ describe('UserListComponent', () => {
             ],
         });
         actions = TestBed.createComponent(UserListComponent).componentInstance;
+    });
+
+    it('uses service pagination and sorting when refreshing', () => {
+        api.page.set(2);
+        api.perPage.set(20);
+        api.sort.set('email,desc');
+        actions.refresh();
+        expect(api.list).toHaveBeenCalledWith(2, 20, 'email,desc');
+    });
+
+    it('loads the requested page and resets pagination when sorting', () => {
+        actions.handlePageEvent({ pageIndex: 3, pageSize: 20, length: 100 });
+        expect(api.list).toHaveBeenLastCalledWith(3, 20, 'name,asc');
+        actions.changeSort({ active: 'email', direction: 'desc' });
+        expect(api.list).toHaveBeenLastCalledWith(0, 10, 'email,desc');
+    });
+
+    it('cancels the previous list request before refreshing', () => {
+        const pending = new Subject();
+        const finalize = vi.fn();
+        api.list.mockReturnValue(pending.pipe(finalizeRequest(finalize)));
+        actions.refresh();
+        actions.refresh();
+        expect(finalize).toHaveBeenCalledOnce();
     });
 
     it('fetches current details before editing and reloads after saving', () => {
