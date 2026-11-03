@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { UserDialogData, UserDialogResult } from '../../models/user-dialog.model';
+import { UserDialogData, UserDialogResult } from '../../../models/user-dialog.model';
 
 const DIALOG_TITLES = {
     create: 'Novo usuário',

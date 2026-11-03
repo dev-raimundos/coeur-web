@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UserDialogComponent } from './user-dialog.component';
-import { UserDialogData } from '../../models/user-dialog.model';
+import { UserDialogData } from '../../../models/user-dialog.model';
 
 describe('UserDialogComponent', () => {
     const user = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };

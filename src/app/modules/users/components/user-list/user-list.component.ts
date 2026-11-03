@@ -12,7 +12,7 @@ import {
     ConfirmationDialogComponent,
     ConfirmationDialogData,
 } from '@shared/components/confirmation-dialog/confirmation-dialog.component';
-import { UserDialogComponent } from '../user-dialog/user-dialog.component';
+import { UserDialogComponent } from './user-dialog/user-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
