@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UserDialogComponent } from './user-dialog.component';
 import { UserDialogData } from '../../../models/user-dialog.model';
+import { RegisterUserDTO } from '../../../models/register-user.dto';
+import { UpdateUserDTO } from '../../../models/update-user.dto';
 
 describe('UserDialogComponent', () => {
     const user = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
@@ -39,8 +41,8 @@ describe('UserDialogComponent', () => {
             name: 'Ana',
             email: user.email,
             password: ' secret ',
-            roles: 'ROLE_USER',
         });
+        expect(fixture.componentInstance.result()).toBeInstanceOf(RegisterUserDTO);
     });
 
     it('returns the validated form values for editing', () => {
@@ -49,8 +51,8 @@ describe('UserDialogComponent', () => {
             name: user.name,
             email: user.email,
             roles: user.roles,
-            password: '',
         });
+        expect(fixture.componentInstance.result()).toBeInstanceOf(UpdateUserDTO);
     });
 
     it('does not return a mutation DTO from the details view', () => {

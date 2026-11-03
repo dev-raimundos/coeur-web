@@ -2,6 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
+import { RegisterUserDTO } from '../models/register-user.dto';
+import { UpdateUserDTO } from '../models/update-user.dto';
 
 describe('UserService', () => {
     let service: UserService;
@@ -58,13 +60,13 @@ describe('UserService', () => {
     it('uses the available CRUD endpoints and payloads', () => {
         service.get('user-1').subscribe();
         http.expectOne('/api/v1/users/user-1').flush({});
-        const creation = { name: 'Ana', email: 'ana@example.com', password: 'secret' };
+        const creation = new RegisterUserDTO('Ana', 'ana@example.com', 'secret');
         service.create(creation).subscribe();
         const create = http.expectOne('/api/v1/users/register');
         expect(create.request.method).toBe('POST');
         expect(create.request.body).toEqual(creation);
         create.flush({});
-        const changes = { name: 'Ana Silva', email: 'ana@example.com', roles: 'ROLE_USER' };
+        const changes = new UpdateUserDTO('Ana Silva', 'ana@example.com', 'ROLE_USER');
         service.update('user-1', changes).subscribe();
         const update = http.expectOne('/api/v1/users/user-1');
         expect(update.request.method).toBe('PUT');
@@ -97,5 +99,40 @@ describe('UserService', () => {
         subscription.unsubscribe();
         expect(request.cancelled).toBe(true);
         expect(service.loading()).toBe(false);
+    });
+
+    it('tracks detail loading, prevents duplicate requests and clears loading on cancellation', () => {
+        const subscription = service.get('user-1').subscribe();
+        const request = http.expectOne('/api/v1/users/user-1');
+        expect(service.detailsLoading()).toBe(true);
+
+        service.get('user-1').subscribe();
+        http.expectNone('/api/v1/users/user-1');
+
+        subscription.unsubscribe();
+        expect(request.cancelled).toBe(true);
+        expect(service.detailsLoading()).toBe(false);
+    });
+
+    it('clears detail loading after success without changing list loading', () => {
+        service.list(0, 10, 'name,asc').subscribe();
+        service.get('user-1').subscribe();
+        http.expectOne('/api/v1/users/user-1').flush({ id: 'user-1' });
+        expect(service.detailsLoading()).toBe(false);
+        expect(service.loading()).toBe(true);
+        http.expectOne((request) => request.url === '/api/v1/users').flush({
+            content: [],
+            totalElements: 0,
+        });
+    });
+
+    it('clears detail loading after failure and allows retry', () => {
+        service.get('user-1').subscribe({ error: () => {} });
+        http.expectOne('/api/v1/users/user-1').flush({}, { status: 500, statusText: 'Error' });
+        expect(service.detailsLoading()).toBe(false);
+
+        service.get('user-1').subscribe();
+        http.expectOne('/api/v1/users/user-1').flush({ id: 'user-1' });
+        expect(service.detailsLoading()).toBe(false);
     });
 });

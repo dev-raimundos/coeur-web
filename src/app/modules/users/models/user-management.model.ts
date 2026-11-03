@@ -5,18 +5,6 @@ export interface UserPage {
     totalElements: number;
 }
 
-export interface RegisterUserRequest {
-    name: string;
-    email: string;
-    password: string;
-}
-
-export interface UpdateUserRequest {
-    name: string;
-    email: string;
-    roles: string;
-}
-
 export interface DeleteUserRequest {
     id: string;
 }

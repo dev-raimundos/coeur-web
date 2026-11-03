@@ -1,13 +1,11 @@
-import { Component, computed, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, filter, Subscription, switchMap } from 'rxjs';
-import { UserFormService } from '../../services/user-form.service';
-import { DeleteUserService } from '../../services/delete-user.service';
+import { Component, inject, OnInit } from '@angular/core';
+import { catchError, EMPTY, filter, Subscription, switchMap, tap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { User } from '@shared/models/user.model';
-import { UserDialogData, UserDialogResult } from '../../models/user-dialog.model';
+import { UserDialogData } from '../../models/user-dialog.model';
+import { RegisterUserDTO } from '../../models/register-user.dto';
+import { UpdateUserDTO } from '../../models/update-user.dto';
 import {
     ConfirmationDialogComponent,
     ConfirmationDialogData,
@@ -22,7 +20,6 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
-import { UserActionsService } from '../../services/user-actions.service';
 import { UserService } from '../../services/user.service';
 import { isValidDto } from '@shared/utils/type-guard';
 import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
@@ -41,20 +38,13 @@ import { UserInitialsPipe } from '@shared/pipes/user-initials.pipe';
         MatTableModule,
         UserInitialsPipe,
     ],
-    providers: [UserFormService, DeleteUserService],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.scss',
 })
 export class UserListComponent implements OnInit {
     public readonly api = inject(UserService);
-    public readonly details = inject(UserActionsService);
-    public readonly mutation = inject(UserFormService);
-    public readonly deletion = inject(DeleteUserService);
-    public readonly busy = computed(() => this.mutation.saving() || this.deletion.deleting());
     private readonly _dialog = inject(MatDialog);
     private readonly _toast = inject(ToastService);
-    private readonly _auth = inject(AuthService);
-    private readonly _destroyRef = inject(DestroyRef);
     public readonly columns = ['name', 'email', 'roles', 'actions'];
 
     private _listRequest?: Subscription;
@@ -73,45 +63,94 @@ export class UserListComponent implements OnInit {
     }
 
     private _load(page: number, perPage: number, sort: string): void {
-        this._listRequest?.unsubscribe();
-        this._listRequest = this.api
-            .list(page, perPage, sort)
-            .pipe(takeUntilDestroyed(this._destroyRef))
-            .subscribe({ error: () => {} });
+        if (this._listRequest) {
+            this._listRequest.unsubscribe();
+        }
+        this._listRequest = this.api.list(page, perPage, sort).subscribe({ error: () => {} });
     }
 
     public ngOnInit(): void {
         this.refresh();
     }
 
-    public create(): void {
-        if (!this.busy()) this._openDialog({ mode: 'create' });
+    public onCreate(): void {
+        this._dialog
+            .open<UserDialogComponent, UserDialogData, RegisterUserDTO>(UserDialogComponent, {
+                data: { mode: 'create' },
+                width: '520px',
+                maxWidth: 'calc(100vw - 32px)',
+                autoFocus: 'first-tabbable',
+            })
+            .afterClosed()
+            .pipe(
+                filter(isValidDto<RegisterUserDTO>),
+                switchMap((dto) => this.api.create(dto)),
+                tap(() => this._toast.info('Usuário criado.')),
+                catchError(() => EMPTY),
+            )
+            .subscribe(() => this.refresh());
     }
 
-    public open(user: User, mode: 'edit' | 'details'): void {
-        if (this.busy()) return;
-        this.details
-            .loadUser(user.id)
-            .pipe(takeUntilDestroyed(this._destroyRef))
-            .subscribe({
-                next: (freshUser) => this._openDialog({ mode, user: freshUser }),
-                error: () => {},
-            });
-    }
-
-    public remove(user: User): void {
-
-        if (this.busy()) {
+    public onEdit(user: User): void {
+        if (this.api.detailsLoading()) {
             return;
         }
-        const isCurrentUser = user.id === this._auth.currentUser()?.id;
+
+        this.api
+            .get(user.id)
+            .pipe(
+                switchMap((freshUser) =>
+                    this._dialog
+                        .open<UserDialogComponent, UserDialogData, UpdateUserDTO>(
+                            UserDialogComponent,
+                            {
+                                data: { mode: 'edit', user: freshUser },
+                                width: '520px',
+                                maxWidth: 'calc(100vw - 32px)',
+                                autoFocus: 'first-tabbable',
+                            },
+                        )
+                        .afterClosed(),
+                ),
+                filter(isValidDto<UpdateUserDTO>),
+                switchMap((dto) => this.api.update(user.id, dto)),
+                tap(() => this._toast.info('Usuário atualizado.')),
+                catchError(() => EMPTY),
+            )
+            .subscribe(() => this.refresh());
+    }
+
+    public onDetails(user: User): void {
+        if (this.api.detailsLoading()) {
+            return;
+        }
+
+        this.api
+            .get(user.id)
+            .pipe(
+                switchMap((freshUser) =>
+                    this._dialog
+                        .open<UserDialogComponent, UserDialogData, void>(UserDialogComponent, {
+                            data: { mode: 'details', user: freshUser },
+                            width: '520px',
+                            maxWidth: 'calc(100vw - 32px)',
+                            autoFocus: 'dialog',
+                        })
+                        .afterClosed(),
+                ),
+                catchError(() => EMPTY),
+            )
+            .subscribe();
+    }
+
+    public onDelete(user: User): void {
         this._dialog
             .open<ConfirmationDialogComponent, ConfirmationDialogData, boolean>(
                 ConfirmationDialogComponent,
                 {
                     data: {
                         title: 'Excluir usuário?',
-                        content: `A conta de ${user.name} (${user.email}) será excluída permanentemente.\n\nEsta ação não pode ser desfeita.${isCurrentUser ? '\n\nVocê está excluindo sua própria conta e sairá da aplicação.' : ''}`,
+                        content: `A conta de ${user.name} (${user.email}) será excluída permanentemente.\n\nEsta ação não pode ser desfeita.`,
                         confirmLabel: 'Excluir usuário',
                     },
                     width: '440px',
@@ -121,54 +160,10 @@ export class UserListComponent implements OnInit {
             .afterClosed()
             .pipe(
                 filter(isValidDto<boolean>),
-                switchMap(() => this.deletion.delete(user.id)),
-                takeUntilDestroyed(this._destroyRef),
+                switchMap(() => this.api.delete(user.id)),
+                tap(() => this._toast.info('Usuário excluído.')),
+                catchError(() => EMPTY),
             )
-            .subscribe({
-                next: () => {
-                    this._toast.info('Usuário excluído.');
-                    if (isCurrentUser) this._auth.logout();
-                    else this.refresh();
-                },
-                error: () => {},
-            });
-    }
-
-    private _openDialog(data: UserDialogData): void {
-        this._dialog
-            .open<UserDialogComponent, UserDialogData, UserDialogResult>(UserDialogComponent, {
-                data,
-                width: '520px',
-                maxWidth: 'calc(100vw - 32px)',
-                autoFocus: data.mode === 'details' ? 'dialog' : 'first-tabbable',
-            })
-            .afterClosed()
-            .pipe(
-                filter(isValidDto<UserDialogResult>),
-                switchMap((dto) => {
-                    const { name, email, password, roles } = dto;
-                    if (data.mode === 'create')
-                        return this.mutation.create({ name, email, password });
-                    if (data.mode === 'edit')
-                        return this.mutation.update(data.user.id, { name, email, roles });
-                    return EMPTY;
-                }),
-                takeUntilDestroyed(this._destroyRef),
-            )
-            .subscribe({
-                next: (saved) => {
-                    this._toast.info(
-                        data.mode === 'create' ? 'Usuário criado.' : 'Usuário atualizado.',
-                    );
-                    if (saved.id === this._auth.currentUser()?.id) {
-                        this._auth
-                            .fetchCurrentUser()
-                            .pipe(takeUntilDestroyed(this._destroyRef))
-                            .subscribe();
-                    }
-                    this.refresh();
-                },
-                error: () => {},
-            });
+            .subscribe(() => this.refresh());
     }
 }

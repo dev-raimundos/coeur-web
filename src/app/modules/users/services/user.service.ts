@@ -1,8 +1,10 @@
-import { finalize, Observable, of, switchMap, tap } from 'rxjs';
+import { EMPTY, finalize, Observable, of, switchMap, tap } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { User } from '@shared/models/user.model';
-import { RegisterUserRequest, UpdateUserRequest, UserPage } from '../models/user-management.model';
+import { UserPage } from '../models/user-management.model';
+import { RegisterUserDTO } from '../models/register-user.dto';
+import { UpdateUserDTO } from '../models/update-user.dto';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -10,21 +12,21 @@ export class UserService {
     private readonly _url = '/api/v1/users';
 
     private readonly _loading = signal(false);
+    private readonly _detailsLoading = signal(false);
     private readonly _data = signal<UserPage>({ content: [], totalElements: 0 });
     private readonly _page = signal(0);
     private readonly _perPage = signal(10);
     private readonly _sort = signal('name,asc');
+
     public readonly loading = this._loading.asReadonly();
+    public readonly detailsLoading = this._detailsLoading.asReadonly();
     public readonly data = this._data.asReadonly();
     public readonly page = this._page.asReadonly();
     public readonly perPage = this._perPage.asReadonly();
     public readonly sort = this._sort.asReadonly();
 
     public list(page: number, size: number, sort: string): Observable<UserPage> {
-        const params = new HttpParams()
-            .set('page', page)
-            .set('size', size)
-            .set('sort', sort);
+        const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
 
         this._page.set(page);
         this._perPage.set(size);
@@ -41,16 +43,24 @@ export class UserService {
         );
     }
 
-    public get(id: string) {
-        return this._http.get<User>(`${this._url}/${encodeURIComponent(id)}`);
+    public get(id: string): Observable<User> {
+        if (this._detailsLoading()) {
+            return EMPTY;
+        }
+
+        this._detailsLoading.set(true);
+
+        return this._http
+            .get<User>(`${this._url}/${encodeURIComponent(id)}`)
+            .pipe(finalize(() => this._detailsLoading.set(false)));
     }
 
-    public create(request: RegisterUserRequest) {
-        return this._http.post<User>(`${this._url}/register`, request);
+    public create(dto: RegisterUserDTO) {
+        return this._http.post<User>(`${this._url}/register`, dto);
     }
 
-    public update(id: string, request: UpdateUserRequest) {
-        return this._http.put<User>(`${this._url}/${encodeURIComponent(id)}`, request);
+    public update(id: string, dto: UpdateUserDTO) {
+        return this._http.put<User>(`${this._url}/${encodeURIComponent(id)}`, dto);
     }
 
     public delete(id: string) {

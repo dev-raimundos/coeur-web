@@ -4,7 +4,7 @@
             <h1 id="users-title">Usuários</h1>
             <p>Gerencie as contas e as permissões de acesso.</p>
         </div>
-        <button mat-flat-button (click)="create()" [disabled]="busy()">
+        <button mat-flat-button (click)="onCreate()">
             <mat-icon>person_add</mat-icon>Novo usuário
         </button>
     </header>
@@ -12,7 +12,7 @@
     <mat-card
         appearance="outlined"
         class="users-card"
-        [attr.aria-busy]="api.loading() || details.loading() || busy()"
+        [attr.aria-busy]="api.loading() || api.detailsLoading()"
     >
         <div class="list-toolbar">
             <h2>
@@ -28,7 +28,7 @@
             </button>
         </div>
         <div class="progress-slot" aria-live="polite">
-            @if (api.loading() || details.loading() || busy()) {
+            @if (api.loading() || api.detailsLoading()) {
                 <mat-progress-bar mode="indeterminate" aria-label="Carregando usuários" />
             }
         </div>
@@ -38,7 +38,7 @@
                 <mat-icon>group</mat-icon>
                 <h3>Nenhum usuário para exibir</h3>
                 <p>Atualize a lista ou adicione uma nova conta.</p>
-                <button mat-flat-button (click)="create()" [disabled]="busy()">
+                <button mat-flat-button (click)="onCreate()">
                     <mat-icon>person_add</mat-icon>Novo usuário
                 </button>
             </div>
@@ -101,19 +101,19 @@
                             <button
                                 mat-icon-button
                                 [matMenuTriggerFor]="userActionsMenu"
-                                [disabled]="details.loading() || busy() || api.loading()"
+                                [disabled]="api.detailsLoading() || api.loading()"
                                 [attr.aria-label]="'Ações de ' + user.name"
                             >
                                 <mat-icon>more_vert</mat-icon>
                             </button>
                             <mat-menu #userActionsMenu="matMenu">
-                                <button mat-menu-item (click)="open(user, 'details')">
+                                <button mat-menu-item (click)="onDetails(user)">
                                     <mat-icon>visibility</mat-icon>Ver detalhes
                                 </button>
-                                <button mat-menu-item (click)="open(user, 'edit')">
+                                <button mat-menu-item (click)="onEdit(user)">
                                     <mat-icon>edit</mat-icon>Editar
                                 </button>
-                                <button mat-menu-item (click)="remove(user)">
+                                <button mat-menu-item (click)="onDelete(user)">
                                     <mat-icon>delete</mat-icon>Excluir
                                 </button>
                             </mat-menu>

@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { UserDialogData, UserDialogResult } from '../../../models/user-dialog.model';
+import { RegisterUserDTO } from '../../../models/register-user.dto';
+import { UpdateUserDTO } from '../../../models/update-user.dto';
 
 const DIALOG_TITLES = {
     create: 'Novo usuário',
@@ -60,6 +62,10 @@ export class UserDialogComponent {
     public result(): UserDialogResult | undefined {
         if (this.form.invalid || this.isDetails) return undefined;
         const { name, email, password, roles } = this.form.getRawValue();
-        return { name: name.trim(), email: email.trim(), password, roles: roles.trim() };
+        if (this.isCreate) {
+            return new RegisterUserDTO(name.trim(), email.trim(), password);
+        }
+
+        return new UpdateUserDTO(name.trim(), email.trim(), roles.trim());
     }
 }

@@ -1,7 +1,5 @@
-import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -17,7 +15,6 @@ describe('UsersPage', () => {
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 { provide: MatDialog, useValue: { open: vi.fn() } },
-                { provide: AuthService, useValue: { currentUser: signal(null) } },
                 { provide: ToastService, useValue: { info: vi.fn() } },
             ],
         });

@@ -1,17 +1,18 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { AuthService } from '@core/services/authentication/auth.service';
 import { ToastService } from '@core/services/notification/toast/toast.service';
 import { finalize as finalizeRequest, of, Subject, throwError } from 'rxjs';
 import { User } from '@shared/models/user.model';
 import { UserListComponent } from './user-list.component';
-import { UserActionsService } from '../../services/user-actions.service';
 import { UserService } from '../../services/user.service';
+import { RegisterUserDTO } from '../../models/register-user.dto';
+import { UpdateUserDTO } from '../../models/update-user.dto';
 
 describe('UserListComponent', () => {
     const user: User = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
     const api = {
+        detailsLoading: signal(false),
         page: signal(0),
         perPage: signal(10),
         sort: signal('name,asc'),
@@ -22,15 +23,12 @@ describe('UserListComponent', () => {
         delete: vi.fn(),
     };
     const dialog = { open: vi.fn() };
-    const auth = {
-        currentUser: signal<User | null>(null),
-        logout: vi.fn(),
-        fetchCurrentUser: vi.fn(),
-    };
+    const toast = { info: vi.fn() };
     let actions: UserListComponent;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        api.detailsLoading.set(false);
         api.page.set(0);
         api.perPage.set(10);
         api.sort.set('name,asc');
@@ -40,16 +38,12 @@ describe('UserListComponent', () => {
         api.update.mockReturnValue(of(user));
         api.delete.mockReturnValue(of(undefined));
         dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
-        auth.currentUser.set(null);
-        auth.fetchCurrentUser.mockReturnValue(of(user));
         TestBed.configureTestingModule({
             imports: [UserListComponent],
             providers: [
-                UserActionsService,
                 { provide: UserService, useValue: api },
                 { provide: MatDialog, useValue: dialog },
-                { provide: AuthService, useValue: auth },
-                { provide: ToastService, useValue: { info: vi.fn() } },
+                { provide: ToastService, useValue: toast },
             ],
         });
         actions = TestBed.createComponent(UserListComponent).componentInstance;
@@ -80,61 +74,57 @@ describe('UserListComponent', () => {
     });
 
     it('fetches current details before editing and reloads after saving', () => {
-        dialog.open.mockReturnValue({ afterClosed: () => of(user) });
-        actions.open(user, 'edit');
+        const dto = new UpdateUserDTO(user.name, user.email, user.roles);
+        dialog.open.mockReturnValue({ afterClosed: () => of(dto) });
+        actions.onEdit(user);
         expect(api.get).toHaveBeenCalledWith(user.id);
         expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'edit', user });
+        expect(api.update).toHaveBeenCalledWith(user.id, dto);
+        expect(api.update.mock.calls[0][1]).toBe(dto);
         expect(api.list).toHaveBeenCalledOnce();
+        expect(toast.info).toHaveBeenCalledExactlyOnceWith('Usuário atualizado.');
     });
 
-    it('prevents duplicate detail requests', () => {
+    it('does not request details while another detail request is loading', () => {
         api.get.mockReturnValue(new Subject<User>());
-        actions.open(user, 'details');
-        actions.open(user, 'details');
+        actions.onDetails(user);
+        api.detailsLoading.set(true);
+        actions.onDetails(user);
         expect(api.get).toHaveBeenCalledOnce();
-        expect(actions.details.loading()).toBe(true);
+        expect(api.detailsLoading()).toBe(true);
     });
 
     it('opens registration and reloads after saving', () => {
+        const dto = new RegisterUserDTO(user.name, user.email, 'secret');
         dialog.open.mockReturnValue({
-            afterClosed: () => of({ name: user.name, email: user.email, password: 'secret' }),
+            afterClosed: () => of(dto),
         });
-        actions.create();
+        actions.onCreate();
         expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'create' });
+        expect(api.create).toHaveBeenCalledWith(dto);
+        expect(api.create.mock.calls[0][0]).toBe(dto);
         expect(api.list).toHaveBeenCalledOnce();
+        expect(toast.info).toHaveBeenCalledExactlyOnceWith('Usuário criado.');
     });
 
     it('does not reload when deletion is cancelled', () => {
-        actions.remove(user);
+        actions.onDelete(user);
         expect(api.list).not.toHaveBeenCalled();
         expect(api.delete).not.toHaveBeenCalled();
-        expect(auth.logout).not.toHaveBeenCalled();
     });
 
-    it('reloads after deleting another account', () => {
+    it('notifies and reloads after deleting an account', () => {
         dialog.open.mockReturnValue({ afterClosed: () => of(true) });
-        actions.remove(user);
+        actions.onDelete(user);
         expect(api.list).toHaveBeenCalledOnce();
+        expect(toast.info).toHaveBeenCalledExactlyOnceWith('Usuário excluído.');
+        expect(dialog.open.mock.calls[0][1].data.content).not.toContain('sua própria conta');
     });
 
-    it('logs out after deleting the current account', () => {
-        auth.currentUser.set(user);
-        dialog.open.mockReturnValue({ afterClosed: () => of(true) });
-        actions.remove(user);
-        expect(dialog.open.mock.calls[0][1].data.content).toContain('sua própria conta');
-        expect(auth.logout).toHaveBeenCalledOnce();
-    });
-
-    it('refreshes the current profile after editing it', () => {
-        auth.currentUser.set(user);
-        dialog.open.mockReturnValue({ afterClosed: () => of(user) });
-        actions.open(user, 'edit');
-        expect(auth.fetchCurrentUser).toHaveBeenCalledOnce();
-    });
     it('ignores cancelled dialogs', () => {
         for (const dto of [undefined, null]) {
             dialog.open.mockReturnValue({ afterClosed: () => of(dto) });
-            actions.create();
+            actions.onCreate();
         }
         expect(api.create).not.toHaveBeenCalled();
         expect(api.list).not.toHaveBeenCalled();
@@ -142,15 +132,44 @@ describe('UserListComponent', () => {
 
     it('requires explicit confirmation before deleting', () => {
         dialog.open.mockReturnValue({ afterClosed: () => of(false) });
-        actions.remove(user);
+        actions.onDelete(user);
         expect(api.delete).not.toHaveBeenCalled();
     });
 
-    it('does not reload or leave loading active after an API error', () => {
+    it('does not reload after a failed update', () => {
         api.update.mockReturnValue(throwError(() => new Error('failed')));
         dialog.open.mockReturnValue({ afterClosed: () => of(user) });
-        actions.open(user, 'edit');
-        expect(actions.mutation.saving()).toBe(false);
+        actions.onEdit(user);
+        expect(api.list).not.toHaveBeenCalled();
+        expect(toast.info).not.toHaveBeenCalled();
+    });
+    it('opens details with fresh data without saving or refreshing the list', () => {
+        const freshUser = { ...user, name: 'Ana Silva' };
+        api.get.mockReturnValue(of(freshUser));
+        dialog.open.mockReturnValue({ afterClosed: () => of(user) });
+        actions.onDetails(user);
+        expect(dialog.open.mock.calls[0][1]).toMatchObject({
+            data: { mode: 'details', user: freshUser },
+            autoFocus: 'dialog',
+        });
+        expect(api.create).not.toHaveBeenCalled();
+        expect(api.update).not.toHaveBeenCalled();
         expect(api.list).not.toHaveBeenCalled();
     });
+
+    it('does not save or refresh after cancelling the edit dialog', () => {
+        actions.onEdit(user);
+        expect(api.update).not.toHaveBeenCalled();
+        expect(api.list).not.toHaveBeenCalled();
+    });
+
+    it.each(['edit', 'details'] as const)(
+        'does not open the %s dialog when loading the user fails',
+        (mode) => {
+            api.get.mockReturnValue(throwError(() => new Error('failed')));
+            if (mode === 'edit') actions.onEdit(user);
+            else actions.onDetails(user);
+            expect(dialog.open).not.toHaveBeenCalled();
+        },
+    );
 });
