@@ -26,6 +26,8 @@ export const appConfig: ApplicationConfig = {
             withInterceptors([ApiUrlInterceptor, errorInterceptor, AuthTokenInterceptor]),
         ),
         provideAppInitializer(() => inject(AuthService).fetchCurrentUser()),
-        provideAppInitializer(() => void inject(ThemeService)),
+        provideAppInitializer(() => {
+            inject(ThemeService);
+        }),
     ],
 };

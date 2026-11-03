@@ -72,8 +72,6 @@ export class ShellComponent {
 
     private _firstAndLastNameOf(name: string | undefined): string {
         const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
-        return [parts[0], parts.length > 1 ? parts[parts.length - 1] : undefined]
-            .filter(Boolean)
-            .join(' ');
+        return [parts[0], parts.length > 1 ? parts.at(-1) : undefined].filter(Boolean).join(' ');
     }
 }

@@ -110,6 +110,7 @@ describe('ShellComponent', () => {
 
         const compiled = fixture.nativeElement as HTMLElement;
         expect(compiled.querySelector('.user-avatar')?.textContent?.trim()).toBe('AS');
+        expect(compiled.querySelector('.user-name')?.textContent?.trim()).toBe('Ana Costa');
     });
 
     it('should not display the user menu when there is no logged in user', () => {

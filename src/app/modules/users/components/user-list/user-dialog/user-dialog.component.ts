@@ -70,10 +70,9 @@ export class UserDialogComponent {
     public result(): UserDialogResult | undefined {
         if (this.form.invalid || this.isDetails) return undefined;
         const { name, email, password, roles } = this.form.getRawValue();
-        if (this.isCreate) {
-            return new RegisterUserDTO(name.trim(), email.trim(), password);
-        }
-
-        return new UpdateUserDTO(name.trim(), email.trim(), roles.trim());
+        const dto: UserDialogResult = this.isCreate
+            ? new RegisterUserDTO(name.trim(), email.trim(), password)
+            : new UpdateUserDTO(name.trim(), email.trim(), roles.trim());
+        return dto;
     }
 }
