@@ -33,6 +33,7 @@
 
 .brand-name {
     font: var(--mat-sys-title-medium);
+    font-size: x-large;
     font-weight: 600;
     letter-spacing: 0.01em;
 }
@@ -109,6 +110,7 @@ mat-nav-list a[mat-list-item].mdc-list-item--activated .mdc-list-item__primary-t
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 500;
 }
 
 .user-menu-caret {
