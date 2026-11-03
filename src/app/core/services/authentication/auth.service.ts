@@ -1,10 +1,19 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginRequest } from '@shared/models/login/login-request.model';
 import { TokenResponse } from '@shared/models/auth/token-response.model';
 import { User } from '@shared/models/user.model';
-import { catchError, finalize, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
+import {
+    catchError,
+    finalize,
+    Observable,
+    of,
+    shareReplay,
+    switchMap,
+    tap,
+    throwError,
+} from 'rxjs';
 
 const ACCESS_TOKEN_KEY = 'coeur.accessToken';
 const REFRESH_TOKEN_KEY = 'coeur.refreshToken';
@@ -61,8 +70,10 @@ export class AuthService {
                 this._currentUser.set(user);
                 this._isLoggedIn.set(true);
             }),
-            catchError(() => {
-                this._clearTokens();
+            catchError((error: unknown) => {
+                if (error instanceof HttpErrorResponse && error.status === 401) {
+                    this._clearTokens();
+                }
                 this._currentUser.set(null);
                 this._isLoggedIn.set(false);
                 return of(null);
@@ -106,11 +117,13 @@ export class AuthService {
             return throwError(() => new Error('No refresh token available.'));
         }
 
-        this._refreshInFlight$ = this._http.post<TokenResponse>(this._refreshUrl, { refreshToken }).pipe(
-            tap((tokens) => this._storeTokens(tokens)),
-            finalize(() => (this._refreshInFlight$ = null)),
-            shareReplay(1),
-        );
+        this._refreshInFlight$ = this._http
+            .post<TokenResponse>(this._refreshUrl, { refreshToken })
+            .pipe(
+                tap((tokens) => this._storeTokens(tokens)),
+                finalize(() => (this._refreshInFlight$ = null)),
+                shareReplay(1),
+            );
 
         return this._refreshInFlight$;
     }

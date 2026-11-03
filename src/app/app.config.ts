@@ -11,7 +11,7 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApiUrlInterceptor } from './core/interceptors/api-url.interceptor';
 import { AuthTokenInterceptor } from './core/interceptors/auth-token.interceptor';
-import { HttpErrorInterceptor } from './core/interceptors/http-error-toast.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { AuthService } from './core/services/authentication/auth.service';
 import { ThemeService } from './core/services/theme/theme.service';
 
@@ -21,7 +21,7 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
         { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
         provideHttpClient(
-            withInterceptors([ApiUrlInterceptor, HttpErrorInterceptor, AuthTokenInterceptor]),
+            withInterceptors([ApiUrlInterceptor, errorInterceptor, AuthTokenInterceptor]),
         ),
         provideAppInitializer(() => inject(AuthService).fetchCurrentUser()),
         provideAppInitializer(() => void inject(ThemeService)),

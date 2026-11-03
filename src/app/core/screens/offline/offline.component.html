@@ -1,0 +1,12 @@
+<main class="error-page" aria-labelledby="offline-title">
+    <mat-icon class="error-icon" aria-hidden="true">cloud_off</mat-icon>
+    <h1 id="offline-title">Não foi possível conectar ao servidor</h1>
+    <p class="error-description">
+        Verifique sua conexão e tente novamente. O servidor também pode estar temporariamente
+        indisponível.
+    </p>
+    <div class="error-actions">
+        <button mat-stroked-button (click)="retry()">Tentar novamente</button>
+        <a mat-flat-button routerLink="/">Voltar para o início</a>
+    </div>
+</main>

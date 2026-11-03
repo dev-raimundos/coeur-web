@@ -8,8 +8,8 @@ const AUTH_FREE_URLS = ['/api/v1/auth/login', '/api/v1/auth/refresh'];
 /**
  * Anexa o access token guardado como header Authorization: Bearer em toda requisição
  * (exceto login/refresh, que são públicas). Num 401, tenta renovar o token uma vez
- * (ver AuthService.refreshAccessToken) e repete a requisição original; se a renovação
- * falhar, desloga o usuário.
+ * (ver AuthService.refreshAccessToken) e repete a requisição original. Desloga quando
+ * a renovação retorna 401 ou não há refresh token; falhas de conexão preservam a sessão.
  */
 export const AuthTokenInterceptor: HttpInterceptorFn = (request, next) => {
     const authService = inject(AuthService);
@@ -30,7 +30,12 @@ export const AuthTokenInterceptor: HttpInterceptorFn = (request, next) => {
             return authService.refreshAccessToken().pipe(
                 switchMap((tokens) => next(_withBearer(request, tokens.accessToken))),
                 catchError((refreshError: unknown) => {
-                    authService.logout();
+                    if (
+                        !(refreshError instanceof HttpErrorResponse) ||
+                        refreshError.status === 401
+                    ) {
+                        authService.logout();
+                    }
                     return throwError(() => refreshError);
                 }),
             );
