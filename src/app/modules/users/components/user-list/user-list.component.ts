@@ -35,7 +35,6 @@ import { UserRoleLabelPipe } from '@shared/pipes/user-role-label.pipe';
         MatTableModule,
         UserInitialsPipe,
         UserRoleLabelPipe,
-        UserRoleLabelPipe,
     ],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.scss',
@@ -91,15 +90,19 @@ export class UserListComponent implements OnInit {
     }
 
     public onEdit(user: User): void {
-        this._dialog
-            .open(UserDialogComponent, {
-                data: { mode: 'edit', user },
-                width: '520px',
-                maxWidth: 'calc(100vw - 32px)',
-                autoFocus: 'first-tabbable',
-            })
-            .afterClosed()
+        this.service
+            .get(user.id)
             .pipe(
+                switchMap((freshUser) =>
+                    this._dialog
+                        .open(UserDialogComponent, {
+                            data: { mode: 'edit', user: freshUser },
+                            width: '520px',
+                            maxWidth: 'calc(100vw - 32px)',
+                            autoFocus: 'first-tabbable',
+                        })
+                        .afterClosed(),
+                ),
                 filter(isValidDto<UpdateUserDTO>),
                 switchMap((dto) => this.service.update(user.id, dto)),
                 tap(() => this._toast.info('Usuário atualizado.')),
@@ -109,12 +112,20 @@ export class UserListComponent implements OnInit {
     }
 
     public onDetails(user: User): void {
-        this._dialog.open(UserDialogComponent, {
-            data: { mode: 'details', user },
-            width: '520px',
-            maxWidth: 'calc(100vw - 32px)',
-            autoFocus: 'dialog',
-        });
+        this.service
+            .get(user.id)
+            .pipe(
+                tap((freshUser) =>
+                    this._dialog.open(UserDialogComponent, {
+                        data: { mode: 'details', user: freshUser },
+                        width: '520px',
+                        maxWidth: 'calc(100vw - 32px)',
+                        autoFocus: 'dialog',
+                    }),
+                ),
+                catchError(() => EMPTY),
+            )
+            .subscribe();
     }
 
     public onDelete(user: User): void {

@@ -1,4 +1,4 @@
-import { finalize, Observable, of, switchMap, tap } from 'rxjs';
+import { EMPTY, finalize, Observable, of, switchMap, tap } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { User } from '@shared/models/user.model';
@@ -12,12 +12,14 @@ export class UserService {
     private readonly _url = '/api/v1/users';
 
     private readonly _loading = signal(false);
+    private readonly _detailsLoading = signal(false);
     private readonly _data = signal<UserPage>({ content: [], totalElements: 0 });
     private readonly _page = signal(0);
     private readonly _perPage = signal(10);
     private readonly _sort = signal('name,asc');
 
     public readonly loading = this._loading.asReadonly();
+    public readonly detailsLoading = this._detailsLoading.asReadonly();
     public readonly data = this._data.asReadonly();
     public readonly page = this._page.asReadonly();
     public readonly perPage = this._perPage.asReadonly();
@@ -39,6 +41,18 @@ export class UserService {
             tap((response) => this._data.set(response)),
             finalize(() => this._loading.set(false)),
         );
+    }
+
+    public get(id: string): Observable<User> {
+        if (this._detailsLoading()) {
+            return EMPTY;
+        }
+
+        this._detailsLoading.set(true);
+
+        return this._http
+            .get<User>(`${this._url}/${encodeURIComponent(id)}`)
+            .pipe(finalize(() => this._detailsLoading.set(false)));
     }
 
     public create(dto: RegisterUserDTO) {

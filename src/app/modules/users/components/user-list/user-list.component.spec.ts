@@ -12,10 +12,12 @@ import { UpdateUserDTO } from '../../models/update-user.dto';
 describe('UserListComponent', () => {
     const user: User = { id: '1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
     const service = {
+        detailsLoading: signal(false),
         page: signal(0),
         perPage: signal(10),
         sort: signal('name,asc'),
         list: vi.fn(),
+        get: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
@@ -26,6 +28,8 @@ describe('UserListComponent', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        service.detailsLoading.set(false);
+        service.get.mockReturnValue(of(user));
         service.page.set(0);
         service.perPage.set(10);
         service.sort.set('name,asc');
@@ -69,12 +73,15 @@ describe('UserListComponent', () => {
         expect(finalize).toHaveBeenCalledOnce();
     });
 
-    it('opens editing with the selected user and reloads after saving', () => {
-        const dto = new UpdateUserDTO(user.name, user.email, user.roles);
+    it('opens editing with fresh user data and reloads after saving', () => {
+        const freshUser = { ...user, name: 'Ana Silva' };
+        service.get.mockReturnValue(of(freshUser));
+        const dto = new UpdateUserDTO(freshUser.name, freshUser.email, freshUser.roles);
         dialog.open.mockReturnValue({ afterClosed: () => of(dto) });
         actions.onEdit(user);
-        expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'edit', user });
-        expect(dialog.open.mock.calls[0][1].data.user).toBe(user);
+        expect(service.get).toHaveBeenCalledWith(user.id);
+        expect(dialog.open.mock.calls[0][1].data).toEqual({ mode: 'edit', user: freshUser });
+        expect(dialog.open.mock.calls[0][1].data.user).toBe(freshUser);
         expect(service.update).toHaveBeenCalledWith(user.id, dto);
         expect(service.update.mock.calls[0][1]).toBe(dto);
         expect(service.list).toHaveBeenCalledOnce();
@@ -130,11 +137,13 @@ describe('UserListComponent', () => {
         expect(service.list).not.toHaveBeenCalled();
         expect(toast.info).not.toHaveBeenCalled();
     });
-    it('opens details with the selected user without saving or refreshing the list', () => {
+    it('opens details with fresh user data without saving or refreshing the list', () => {
+        const freshUser = { ...user, name: 'Ana Silva' };
+        service.get.mockReturnValue(of(freshUser));
         dialog.open.mockReturnValue({ afterClosed: () => of(user) });
         actions.onDetails(user);
         expect(dialog.open.mock.calls[0][1]).toMatchObject({
-            data: { mode: 'details', user },
+            data: { mode: 'details', user: freshUser },
             autoFocus: 'dialog',
         });
         expect(service.create).not.toHaveBeenCalled();
@@ -147,4 +156,29 @@ describe('UserListComponent', () => {
         expect(service.update).not.toHaveBeenCalled();
         expect(service.list).not.toHaveBeenCalled();
     });
+    it.each(['edit', 'details'] as const)(
+        'waits for user data before opening the %s modal',
+        (mode) => {
+            const response = new Subject<User>();
+            service.get.mockReturnValue(response);
+            if (mode === 'edit') actions.onEdit(user);
+            else actions.onDetails(user);
+            expect(dialog.open).not.toHaveBeenCalled();
+            response.next(user);
+            response.complete();
+            expect(dialog.open).toHaveBeenCalledOnce();
+        },
+    );
+
+    it.each(['edit', 'details'] as const)(
+        'does not open the %s modal when fetching fails',
+        (mode) => {
+            service.get.mockReturnValue(throwError(() => new Error('failed')));
+            if (mode === 'edit') actions.onEdit(user);
+            else actions.onDetails(user);
+            expect(dialog.open).not.toHaveBeenCalled();
+            expect(service.update).not.toHaveBeenCalled();
+            expect(toast.info).not.toHaveBeenCalled();
+        },
+    );
 });

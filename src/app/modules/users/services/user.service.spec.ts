@@ -58,6 +58,15 @@ describe('UserService', () => {
     });
 
     it('uses the available CRUD endpoints and payloads', () => {
+        const received = vi.fn();
+        service.get('user-1').subscribe(received);
+        const details = http.expectOne('/api/v1/users/user-1');
+        expect(details.request.method).toBe('GET');
+        expect(service.detailsLoading()).toBe(true);
+        const user = { id: 'user-1', name: 'Ana', email: 'ana@example.com', roles: 'ROLE_USER' };
+        details.flush(user);
+        expect(received).toHaveBeenCalledWith(user);
+        expect(service.detailsLoading()).toBe(false);
         const creation = new RegisterUserDTO('Ana', 'ana@example.com', 'secret');
         service.create(creation).subscribe();
         const create = http.expectOne('/api/v1/users/register');
@@ -97,5 +106,24 @@ describe('UserService', () => {
         subscription.unsubscribe();
         expect(request.cancelled).toBe(true);
         expect(service.loading()).toBe(false);
+    });
+
+    it('prevents concurrent detail requests and clears loading on cancellation', () => {
+        const subscription = service.get('user-1').subscribe();
+        const request = http.expectOne('/api/v1/users/user-1');
+        service.get('user-1').subscribe();
+        http.expectNone('/api/v1/users/user-1');
+        subscription.unsubscribe();
+        expect(request.cancelled).toBe(true);
+        expect(service.detailsLoading()).toBe(false);
+    });
+
+    it('clears detail loading after failure and allows retry', () => {
+        service.get('user-1').subscribe({ error: () => {} });
+        http.expectOne('/api/v1/users/user-1').flush({}, { status: 500, statusText: 'Error' });
+        expect(service.detailsLoading()).toBe(false);
+        service.get('user-1').subscribe();
+        http.expectOne('/api/v1/users/user-1').flush({ id: 'user-1' });
+        expect(service.detailsLoading()).toBe(false);
     });
 });

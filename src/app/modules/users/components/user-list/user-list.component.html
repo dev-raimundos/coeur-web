@@ -9,7 +9,11 @@
         </button>
     </header>
 
-    <mat-card appearance="outlined" class="users-card" [attr.aria-busy]="service.loading()">
+    <mat-card
+        appearance="outlined"
+        class="users-card"
+        [attr.aria-busy]="service.loading() || service.detailsLoading()"
+    >
         <div class="list-toolbar">
             <h2>
                 Contas cadastradas <span class="count">{{ service.data().totalElements }}</span>
@@ -24,7 +28,7 @@
             </button>
         </div>
         <div class="progress-slot" aria-live="polite">
-            @if (service.loading()) {
+            @if (service.loading() || service.detailsLoading()) {
                 <mat-progress-bar mode="indeterminate" aria-label="Carregando usuários" />
             }
         </div>
@@ -97,7 +101,7 @@
                             <button
                                 mat-icon-button
                                 [matMenuTriggerFor]="userActionsMenu"
-                                [disabled]="service.loading()"
+                                [disabled]="service.loading() || service.detailsLoading()"
                                 [attr.aria-label]="'Ações de ' + user.name"
                             >
                                 <mat-icon>more_vert</mat-icon>
